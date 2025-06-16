@@ -177,7 +177,7 @@ class DataManager:
         try:
             df = pd.read_csv(AppConfig.CSV_FILENAME)
 
-            '''
+            
             # Tried to create the percent change column, but might not have worked.
             # For benefits: handle cases where baseline benefits is zero
             pct_benefits_change = np.zeros_like(df["Baseline Benefits"])
@@ -185,7 +185,7 @@ class DataManager:
             pct_benefits_change[mask] = (df['Total Change in Benefits'][mask] / np.abs(df["Baseline Benefits"][mask])) * 100
             
             df['Percentage Change in Benefits'] = pct_benefits_change
-            '''
+            
             
             DataManager._validate_data(df)
             logger.info(f"Successfully loaded {len(df)} household records")
