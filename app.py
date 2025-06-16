@@ -10,7 +10,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
-
+import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -25,6 +25,7 @@ class AnalysisType(Enum):
     FEDERAL_TAXES = "Federal Taxes"
     STATE_TAXES = "State Taxes"
     NET_INCOME = "Net Income"
+    BENEFITS = "Benefits" 
 
 
 class AppConfig:
@@ -175,6 +176,16 @@ class DataManager:
         """
         try:
             df = pd.read_csv(AppConfig.CSV_FILENAME)
+
+
+
+            # For benefits: handle cases where baseline benefits is zero
+            pct_benefits_change = np.zeros_like(df["Baseline Benefits"])
+            mask = df["Baseline Benefits"] != 0
+            pct_benefits_change[mask] = (df['Total Change in Benefits'][mask] / np.abs(df["Baseline Benefits"][mask])) * 100
+            
+            df['Percentage Change in Benefits'] = pct_benefits_change
+
             DataManager._validate_data(df)
             logger.info(f"Successfully loaded {len(df)} household records")
             return df
@@ -434,7 +445,8 @@ class TaxAnalysisEngine:
         titles = {
             AnalysisType.FEDERAL_TAXES: "Federal Taxes",
             AnalysisType.STATE_TAXES: "State Taxes", 
-            AnalysisType.NET_INCOME: "Net Income"
+            AnalysisType.NET_INCOME: "Net Income",
+            AnalysisType.BENEFITS: "Benefits"
         }
         return titles[self.analysis_type]
     
@@ -448,7 +460,9 @@ class TaxAnalysisEngine:
         mapping = {
             AnalysisType.FEDERAL_TAXES: (profile.baseline_federal_tax, "Federal Taxes"),
             AnalysisType.STATE_TAXES: (household_data.get('State Income Tax', 0), "State Taxes"),
-            AnalysisType.NET_INCOME: (profile.baseline_net_income, "Net Income")
+            AnalysisType.NET_INCOME: (profile.baseline_net_income, "Net Income"),
+            AnalysisType.BENEFITS: (household_data.get('Baseline Total Benefits', 0), "Benefits")
+
         }
         return mapping[self.analysis_type]
     
@@ -477,6 +491,13 @@ class TaxAnalysisEngine:
                 household_data['Percentage Change in Net Income'],
                 "Net Income Change",
                 household_data['Baseline Net Income'], "Reformed Net Income"
+                ),
+            AnalysisType.BENEFITS: (
+                household_data['Total Change in Benefits'],
+                # Calculate percentage change with baseline benefits, add in column info here later
+                household_data['Percentage Change in Benefits'],
+                "Benefits Change",
+                household_data['Baseline Total Benefits'], "Reformed Benefits"
             )
         }
         
@@ -484,7 +505,7 @@ class TaxAnalysisEngine:
         final_value = baseline_value + change_value
         
         # Determine color based on analysis type and value
-        if self.analysis_type == AnalysisType.NET_INCOME:
+        if self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
             color = "green" if change_value > 0 else "red"  # Income increase is good
         else:
             color = "red" if change_value > 0 else "green"  # Tax increase is bad
@@ -496,7 +517,8 @@ class TaxAnalysisEngine:
         prefixes = {
             AnalysisType.FEDERAL_TAXES: "Change in Federal tax liability after",
             AnalysisType.STATE_TAXES: "Change in State tax liability after",
-            AnalysisType.NET_INCOME: "Change in Net income after"
+            AnalysisType.NET_INCOME: "Change in Net income after",
+            AnalysisType.BENEFITS: "Change in Benefits after"
         }
         return prefixes[self.analysis_type]
 
@@ -661,13 +683,18 @@ class VisualizationRenderer:
                 f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
                 f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
                 f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None
+            ],
+            AnalysisType.BENEFITS: [
+                f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
+                f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
+                f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None
             ]
         }
         
         additional_taxes = [tax for tax in tax_mappings[self.analysis_engine.analysis_type] if tax is not None]
         
         if additional_taxes:
-            content = "<p style='margin: 10px 0 0 0;'><strong>Additional Taxes:</strong></p>"
+            content = "<p style='margin: 10px 0 0 0;'><strong>Additional Information:</strong></p>"
             content += "".join(f"<p style='margin: 2px 0 0 0;'>• {tax}</p>" for tax in additional_taxes)
             return content
         return ""
@@ -698,8 +725,8 @@ class VisualizationRenderer:
         for i, impact in enumerate(impacts):
             with cols[i % 3]:
                 # Determine label and color based on analysis type
-                if self.analysis_engine.analysis_type == AnalysisType.NET_INCOME:
-                    label = "Income Change"
+                if self.analysis_engine.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
+                    label = "Change" if self.analysis_engine.analysis_type == AnalysisType.BENEFITS else "Income Change"
                     color = "green" if impact.total_change > 0 else "red"
                 else:
                     label = "Tax Change"
@@ -751,7 +778,7 @@ class VisualizationRenderer:
         fig = go.Figure()
         
         # Determine colors based on analysis type, sorry for the redundancy! It was simplest like this.
-        if self.analysis_engine.analysis_type == AnalysisType.NET_INCOME:
+        if self.analysis_engine.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
             # For net income: increases are good (green), decreases are bad (red)
             increasing_color = "green"
             decreasing_color = "red"
@@ -800,7 +827,8 @@ class VisualizationRenderer:
         focus_mapping = {
             AnalysisType.FEDERAL_TAXES: "Federal Taxes",
             AnalysisType.NET_INCOME: "Net Income overall",
-            AnalysisType.STATE_TAXES: "State Taxes"
+            AnalysisType.STATE_TAXES: "State Taxes",
+            AnalysisType.BENEFITS: "Benefits"
         }
         analysis_focus = focus_mapping[self.analysis_engine.analysis_type]
 
@@ -991,3 +1019,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
