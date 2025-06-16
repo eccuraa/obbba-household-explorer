@@ -177,15 +177,16 @@ class DataManager:
         try:
             df = pd.read_csv(AppConfig.CSV_FILENAME)
 
-
-
+            '''
+            # Tried to create the percent change column, but might not have worked.
             # For benefits: handle cases where baseline benefits is zero
             pct_benefits_change = np.zeros_like(df["Baseline Benefits"])
             mask = df["Baseline Benefits"] != 0
             pct_benefits_change[mask] = (df['Total Change in Benefits'][mask] / np.abs(df["Baseline Benefits"][mask])) * 100
             
             df['Percentage Change in Benefits'] = pct_benefits_change
-
+            '''
+            
             DataManager._validate_data(df)
             logger.info(f"Successfully loaded {len(df)} household records")
             return df
@@ -457,11 +458,12 @@ class TaxAnalysisEngine:
         Returns:
             Tuple[float, str]: (baseline_value, baseline_label)
         """
+        ## TODO: Make this mapping more consistent later
         mapping = {
             AnalysisType.FEDERAL_TAXES: (profile.baseline_federal_tax, "Federal Taxes"),
-            AnalysisType.STATE_TAXES: (household_data.get('State Income Tax', 0), "State Taxes"),
+            AnalysisType.STATE_TAXES: (household_data['State Income Tax'], "State Taxes"),
             AnalysisType.NET_INCOME: (profile.baseline_net_income, "Net Income"),
-            AnalysisType.BENEFITS: (household_data.get('Baseline Total Benefits', 0), "Benefits")
+            AnalysisType.BENEFITS: (household_data['Baseline Total Benefits'], "Benefits")
 
         }
         return mapping[self.analysis_type]
@@ -494,8 +496,7 @@ class TaxAnalysisEngine:
                 ),
             AnalysisType.BENEFITS: (
                 household_data['Total Change in Benefits'],
-                # Calculate percentage change with baseline benefits, add in column info here later
-                household_data['Percentage Change in Benefits'],
+                household_data['Total Change in Benefits'] / max(household_data['Baseline Total Benefits'], 1) * 100,
                 "Benefits Change",
                 household_data['Baseline Total Benefits'], "Reformed Benefits"
             )
