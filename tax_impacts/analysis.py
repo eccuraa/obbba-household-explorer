@@ -239,13 +239,13 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     mask = baseline_income_tax != 0
     pct_tax_change[mask] = (results[f'Total Change in Federal Tax Liability'][mask] / np.abs(baseline_income_tax[mask])) * 100
 
+    results[f'Percentage Change in Federal Tax Liability'] = pct_tax_change
     
     # For net income: handle cases where baseline net income is zero
     pct_net_income_change = np.zeros_like(baseline_net_income)
     mask = baseline_net_income != 0
     pct_net_income_change[mask] = (results[f'Total Change in Net Income'][mask] / np.abs(baseline_net_income[mask])) * 100
     
-    results[f'Percentage Change in Federal Tax Liability'] = pct_tax_change
     results[f'Percentage Change in Net Income'] = pct_net_income_change
     
     # Calculate percentage changes for state tax
@@ -254,6 +254,14 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     pct_state_tax_change[mask] = (results[f'Total Change in State Tax Liability'][mask] / np.abs(state_income_tax[mask])) * 100
         
     results[f'Percentage Change in State Tax Liability'] = pct_state_tax_change
+
+    # For benefits: handle cases where baseline benefits is zero
+    pct_benefits_change = np.zeros_like(total_benefits)
+    mask = total_benefits != 0
+    pct_benefits_change[mask] = (results[f'Total Change in Benefits'][mask] / np.abs(total_benefits[mask])) * 100
+    
+    results[f'Percentage Change in Benefits'] = pct_benefits_change
+
 
     # Create DataFrame
     df = pd.DataFrame(results)
