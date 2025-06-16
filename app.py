@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 class AnalysisType(Enum):
     """Supported analysis focus types for the dashboard."""
     FEDERAL_TAXES = "Federal Taxes"
-    NET_INCOME = "Net Income"
     STATE_TAXES = "State Taxes"
+    NET_INCOME = "Net Income"
 
 
 class AppConfig:
@@ -67,7 +67,8 @@ class AppConfig:
 
 class UIConfig:
     """UI styling and configuration constants."""
-    CONTAINER_STYLE = "padding: 10px; border-radius: 5px; background-color: #f0f2f6;"
+    # Use transparent background with subtle backdrop
+    CONTAINER_STYLE = "padding: 10px; border-radius: 5px; background-color: rgba(128, 128, 128, 0.1); backdrop-filter: brightness(0.95);"
 
 @dataclass
 class FilterConfig:
@@ -431,8 +432,8 @@ class TaxAnalysisEngine:
     def get_chart_title(self) -> str:
         """Get the appropriate chart title for the analysis type."""
         titles = {
-            AnalysisType.FEDERAL_TAXES: "Federal Tax Liability",
-            AnalysisType.STATE_TAXES: "State Tax Liability", 
+            AnalysisType.FEDERAL_TAXES: "Federal Taxes",
+            AnalysisType.STATE_TAXES: "State Taxes", 
             AnalysisType.NET_INCOME: "Net Income"
         }
         return titles[self.analysis_type]
@@ -597,7 +598,7 @@ class VisualizationRenderer:
                 income_list.append(f"• {display_name}: ${amount:,.0f}")
         
         if income_list:
-            content = "<p><strong>Income Sources:</strong></p>"
+            content = "<p><strong>Featured Income Sources:</strong></p>"
             content += "".join(f"<p style='margin-left: 10px; margin-top: 2px;'>{income}</p>" 
                              for income in income_list)
             return content
@@ -657,7 +658,7 @@ class VisualizationRenderer:
                 f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None
             ],
             AnalysisType.NET_INCOME: [
-                f"Federal Tax Liability: ${profile.baseline_federal_tax:,.0f}",
+                f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
                 f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
                 f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None
             ]
@@ -743,11 +744,21 @@ class VisualizationRenderer:
         except Exception as e:
             logger.error(f"Error creating waterfall chart: {str(e)}")
             st.error("Error creating waterfall chart. Please try a different household.")
-    
+
     def _create_waterfall_figure(self, waterfall_data: List[Tuple], chart_title: str, 
-                                baseline_value: float, final_value: float) -> go.Figure:
+                            baseline_value: float, final_value: float) -> go.Figure:
         """Create Plotly waterfall figure."""
         fig = go.Figure()
+        
+        # Determine colors based on analysis type, sorry for the redundancy! It was simplest like this.
+        if self.analysis_engine.analysis_type == AnalysisType.NET_INCOME:
+            # For net income: increases are good (green), decreases are bad (red)
+            increasing_color = "green"
+            decreasing_color = "red"
+        else:
+            # For taxes: increases are bad (red), decreases are good (green)
+            increasing_color = "red"
+            decreasing_color = "green"
         
         fig.add_trace(go.Waterfall(
             name=f"{chart_title} Impact",
@@ -758,8 +769,8 @@ class VisualizationRenderer:
             text=[f"${item[1]:,.0f}" for item in waterfall_data],
             textposition="outside",
             connector={"line": {"color": "rgb(63, 63, 63)"}},
-            increasing={"marker": {"color": "red"}},
-            decreasing={"marker": {"color": "green"}},
+            increasing={"marker": {"color": increasing_color}},
+            decreasing={"marker": {"color": decreasing_color}},
             totals={"marker": {"color": "blue"}}
         ))
         
@@ -792,9 +803,15 @@ class VisualizationRenderer:
             AnalysisType.STATE_TAXES: "State Taxes"
         }
         analysis_focus = focus_mapping[self.analysis_engine.analysis_type]
+
+        income_sources = AppConfig.INCOME_SOURCES
+        income_names = [display_name for display_name, _ in income_sources]
+        income_list = ", ".join(income_names[:-1]) + f", and {income_names[-1]}"
         
         st.info(f"""
-        📋 **Analysis Scope:** We are currently analyzing the effects of {reforms_text} on {analysis_focus}.
+        📋 **Analysis Scope:** We are currently analyzing the effects of {reforms_text} on {analysis_focus}. \n
+        Currently, we are only displaying the {income_list} as featured income sources, with Employment Income including Tip and Overtime Income. 
+        This is why these selected income sources will often not add up to the Gross Income total.
         """)
 
 
@@ -885,7 +902,7 @@ class HouseholdDashboard:
             profile = HouseholdProfile.from_series(household_data)
             
             # Set up analysis
-            analysis_type = self._render_analysis_type_selector()
+            analysis_type = self._render_analysis_type_selector(household_data)
             analysis_engine = TaxAnalysisEngine(analysis_type)
             
             # Render main content
@@ -909,34 +926,29 @@ class HouseholdDashboard:
         st.title("HR1 Tax Bill - Household Impact Dashboard")
         st.markdown("*Explore how the HR1 tax bill affects individual American households compared to current policy*")
         st.sidebar.header("Select Household")
-    
-    def _render_analysis_type_selector(self) -> AnalysisType:
-        """
-        Render analysis type selector in sidebar.
-        
-        Returns:
-            AnalysisType: Selected analysis type
-        """
+
+
+    def _render_analysis_type_selector(self, household_data: pd.Series) -> AnalysisType:
+        """Render analysis type selector in sidebar with percent changes."""
         st.sidebar.markdown("---")
         st.sidebar.subheader("Analysis Type")
         
-        analysis_type = st.sidebar.radio(
-            "Select what to analyze:",
-            [AnalysisType.FEDERAL_TAXES.value, AnalysisType.STATE_TAXES.value, AnalysisType.NET_INCOME.value],
-            index=0
-        )
+        type_mapping = {analysis_type.value: analysis_type for analysis_type in AnalysisType}
         
-        # Map string values back to enum
-        type_mapping = {
-            AnalysisType.FEDERAL_TAXES.value: AnalysisType.FEDERAL_TAXES,
-            AnalysisType.STATE_TAXES.value: AnalysisType.STATE_TAXES,
-            AnalysisType.NET_INCOME.value: AnalysisType.NET_INCOME
-        }
+        options = []
+        for display_value, enum_type in type_mapping.items():
+            # Create temporary analysis engine for this type
+            temp_engine = TaxAnalysisEngine(enum_type)  # <-- Creating a temporary engine
+            _, pct, *_ = temp_engine.get_change_info(household_data)  # <-- Using the temp engine
+            label = f"{display_value} ({pct:+.1f}%)"
+            options.append(label)
         
-        selected_type = type_mapping[analysis_type]
+        selected = st.sidebar.radio("Select what to analyze:", options, index=0)
+        selected_type = type_mapping[selected.split(" (")[0]]
         st.session_state.analysis_type = selected_type
         return selected_type
     
+
     def _get_household_data(self, df_filtered: pd.DataFrame, household_id: int) -> pd.Series:
         """
         Get household data series for the selected household ID.
