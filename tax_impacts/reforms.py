@@ -607,7 +607,7 @@ def hr1_salt_reform():
         }
     }, country_id="us")
 
-def snap_takeup_reform():
+def aca_enhanced_subsidies_reform():
     return Reform.from_dict({
         "gov.aca.ptc_phase_out_rate[0].amount": {
             "2026-01-01.2100-12-31": 0.02
@@ -639,7 +639,7 @@ def snap_takeup_reform():
 }, country_id="us")
 
 
-def aca_enhanced_subsidies_reform():
+def snap_takeup_reform():
     return Reform.from_dict({
         "gov.usda.snap.takeup_rate": {
             "2026-01-01.2028-12-31": 0.78
