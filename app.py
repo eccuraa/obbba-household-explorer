@@ -53,7 +53,11 @@ class AppConfig:
         ("Auto Loan Interest Deduction", "Auto Loan Interest ALD"),
         ("Miscellaneous Reform", "Miscellaneous Reform"),
         ("Limitation on Itemized Deductions", "Other Itemized Deductions Reform"),
-        ("Pease Reform", "Pease Reform")
+        ("Pease Reform", "Pease Reform"),
+        ("ACA Enhanced Subsidies Reform", "ACA Enhanced Subsidies Reform"),
+        ("SNAP Reform", "SNAP Takeup Reform"),
+        ("ACA Reform", "ACA Takeup Reform"),
+        ("Medicaid Reform", "Medicaid Takeup Reform"),
     ]
 
     # Income source mappings for display
