@@ -225,6 +225,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         # Update previous values for next iteration
         previous_income_tax = reformed_income_tax.copy()
         previous_state_income_tax = reformed_state_income_tax.copy()
+        previous_total_benefits = reformed_total_benefits.copy()
         previous_net_income = reformed_net_income.copy()
     
     # Add final total changes (from baseline to fully reformed)
