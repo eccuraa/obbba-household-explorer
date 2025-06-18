@@ -677,7 +677,6 @@ class VisualizationRenderer:
         self._render_styled_container("Baseline Values", content)
         st.markdown("<br>", unsafe_allow_html=True)
 
-
     def _build_benefit_baseline(self, household_data: pd.Series) -> str:
         """Build content for benefit components breakdown."""
         # Define benefit columns to check
