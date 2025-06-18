@@ -34,7 +34,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     
     # Get household-level baseline values
     baseline_income_tax = baseline.calculate("income_tax", map_to="household", period=year).values
-    baseline_net_income = baseline.calculate("household_net_income", map_to="household", period=year).values
+    baseline_net_income = baseline.calculate("household_net_income_including_health_benefits", map_to="household", period=year).values
 
     # Get Benefit values
     baseline_benefits = baseline.calculate("household_benefits", map_to="household", period=year).values
@@ -203,7 +203,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         # Get reformed values
         reformed_income_tax = reformed.calculate("income_tax", map_to="household", period=year).values
         reformed_state_income_tax = reformed.calculate("state_income_tax", map_to="household", period=year).values
-        reformed_net_income = reformed.calculate("household_net_income", map_to="household", period=year).values
+        reformed_net_income = reformed.calculate("household_net_income_including_health_benefits", map_to="household", period=year).values
         reformed_benefits = reformed.calculate("household_benefits", map_to="household", period=year).values
         reformed_medicaid = reformed.calculate("medicaid", map_to="household", period=year).values
         reformed_ptc = reformed.calculate("aca_ptc", map_to="household", period=year).values
@@ -225,6 +225,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         # Update previous values for next iteration
         previous_income_tax = reformed_income_tax.copy()
         previous_state_income_tax = reformed_state_income_tax.copy()
+        previous_total_benefits = reformed_total_benefits.copy()
         previous_net_income = reformed_net_income.copy()
     
     # Add final total changes (from baseline to fully reformed)
