@@ -963,6 +963,9 @@ class HouseholdDashboard:
             analysis_type = self._render_analysis_type_selector(household_data)
             analysis_engine = TaxAnalysisEngine(analysis_type)
             
+            # Change URL to include this household ID and analysis type
+            st.query_params.update({"ID": household_id, ",": analysis_type})
+
             # Render main content
             renderer = VisualizationRenderer(analysis_engine)
             renderer.render_main_content(profile, household_data)
