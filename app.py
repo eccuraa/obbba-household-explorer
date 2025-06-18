@@ -560,7 +560,7 @@ class VisualizationRenderer:
         """Helper method to render consistently styled containers."""
         st.markdown(f"""
         <div style="{UIConfig.CONTAINER_STYLE}">
-        <h4 style="color: #616161;">{title}</h4>
+        <h4 style="color: #0C1A27;">{title}</h4>
         {content}
         </div>
         """, unsafe_allow_html=True)
@@ -575,20 +575,20 @@ class VisualizationRenderer:
             ("Number of Dependents", f"{profile.number_of_dependents:.0f}"),
         ]
         
-        content = "".join(f"<p style='color: #616161;><strong>{label}:</strong> {value}</p>" for label, value in attributes)
+        content = "".join(f"<p style='color: #0C1A27;><strong>{label}:</strong> {value}</p>" for label, value in attributes)
         
         # Add children's ages if any
         if profile.number_of_dependents > 0:
             dependent_ages = self._get_dependent_ages(household_data)
             if dependent_ages:
-                content += f"<p style='color: #616161;'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+                content += f"<p style='color: #0C1A27;'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
         
         # Add marital status
         marital_info = self._get_marital_info(profile)
-        content += f"<p style='color: #616161;'><strong>Marital Status:</strong> {marital_info}</p>"
+        content += f"<p style='color: #0C1A27;'><strong>Marital Status:</strong> {marital_info}</p>"
         
         # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: #616161;'>
+        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: #0C1A27;'>
                      <strong> 💰 Gross Income:</strong> ${household_data['Gross Income']:,.0f}</p>"""
         
         # Add income sources
@@ -625,8 +625,8 @@ class VisualizationRenderer:
                 income_list.append(f"• {display_name}: ${amount:,.0f}")
         
         if income_list:
-            content = "<p style='color: #616161;'><strong>Featured Income Sources:</strong></p>"
-            content += "".join(f"<p style='margin-left: 10px; margin-top: 2px; color: #616161;'>{income}</p>" 
+            content = "<p style='color: #0C1A27;'><strong>Featured Income Sources:</strong></p>"
+            content += "".join(f"<p style='margin-left: 10px; margin-top: 2px; color: #0C1A27;'>{income}</p>" 
                              for income in income_list)
             return content
         return ""
@@ -671,7 +671,7 @@ class VisualizationRenderer:
             # For other analysis types, show additional taxes
             additional_content = self._build_additional_taxes_content(profile, household_data)
         
-        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: #616161;'>{baseline_label}: ${baseline_value:,.0f}</p>"
+        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: #0C1A27;'>{baseline_label}: ${baseline_value:,.0f}</p>"
         content += additional_content
         
         self._render_styled_container("Baseline Values", content)
@@ -691,7 +691,7 @@ class VisualizationRenderer:
         ]
         
         if benefit_components:
-            return ("".join(f"<p style='margin: 2px 0 0 0; color: #616161;'>{component}</p>" for component in benefit_components))
+            return ("".join(f"<p style='margin: 2px 0 0 0; color: #0C1A27;'>{component}</p>" for component in benefit_components))
         return ""
 
     def _build_additional_taxes_content(self, profile: HouseholdProfile, household_data: pd.Series) -> str:
@@ -724,8 +724,8 @@ class VisualizationRenderer:
         additional_taxes = [tax for tax in tax_mappings[self.analysis_engine.analysis_type] if tax is not None]
         
         if additional_taxes:
-            content = "<p style='margin: 10px 0 0 0; color: #616161;'><strong>Additional Information:</strong></p>"
-            content += "".join(f"<p style='margin: 2px 0 0 0; color: #616161;'>• {tax}</p>" for tax in additional_taxes)
+            content = "<p style='margin: 10px 0 0 0; color: #0C1A27;'><strong>Additional Information:</strong></p>"
+            content += "".join(f"<p style='margin: 2px 0 0 0; color: #0C1A27;'>• {tax}</p>" for tax in additional_taxes)
             return content
         return ""
 
@@ -737,7 +737,7 @@ class VisualizationRenderer:
         <p style="color: {color}; font-size: 18px; font-weight: bold;">
         {change_label}: ${change_value:,.0f} ({pct_change:+.1f}%)
         </p>
-        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: #616161;">
+        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: #0C1A27;">
         {final_label}: ${final_value:,.0f}
         </p>
         """
@@ -764,7 +764,7 @@ class VisualizationRenderer:
                 
                 st.markdown(f"""
                 <div style="padding: 8px; border-radius: 5px; background-color: #F7FAFD; border: 1px solid #BDBDBD; margin: 5px 0;">
-                <h5 style="color: #616161; margin: 0 0 8px 0;">{impact.name}</h5>
+                <h5 style="color: #0C1A27; margin: 0 0 8px 0;">{impact.name}</h5>
                 <p style="color: {color}; font-weight: bold; margin: 0;">
                 {label}: ${impact.total_change:,.0f}
                 </p>
@@ -1051,3 +1051,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
