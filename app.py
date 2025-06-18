@@ -763,9 +763,9 @@ class VisualizationRenderer:
                     color = "green" if impact.total_change < 0 else "red"
                 
                 st.markdown(f"""
-                <div style="padding: 8px; border-radius: 5px; background-color: #f9f9f9; margin: 5px 0;">
-                <h5>{impact.name}</h5>
-                <p style="color: {color}; font-weight: bold;">
+                <div style="padding: 8px; border-radius: 5px; background-color: rgba(128, 128, 128, 0.1); border: 1px solid rgba(128, 128, 128, 0.3); margin: 5px 0;">
+                <h5 style="color: var(--text-color, #595955); margin: 0 0 8px 0;">{impact.name}</h5>
+                <p style="color: {color}; font-weight: bold; margin: 0;">
                 {label}: ${impact.total_change:,.0f}
                 </p>
                 </div>
