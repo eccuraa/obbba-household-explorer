@@ -53,7 +53,11 @@ class AppConfig:
         ("Auto Loan Interest Deduction", "Auto Loan Interest ALD"),
         ("Miscellaneous Reform", "Miscellaneous Reform"),
         ("Limitation on Itemized Deductions", "Other Itemized Deductions Reform"),
-        ("Pease Reform", "Pease Reform")
+        ("Pease Reform", "Pease Reform"),
+        ("ACA Enhanced Subsidies Reform", "ACA Enhanced Subsidies Reform"),
+        ("SNAP Reform", "SNAP Takeup Reform"),
+        ("ACA Reform", "ACA Takeup Reform"),
+        ("Medicaid Reform", "Medicaid Takeup Reform"),
     ]
 
     # Income source mappings for display
@@ -655,15 +659,40 @@ class VisualizationRenderer:
         st.subheader("🔄 HR1 Bill Impact Summary")
         
         baseline_value, baseline_label = self.analysis_engine.get_baseline_info(profile, household_data)
-        
-        # Build additional taxes content
-        additional_content = self._build_additional_taxes_content(profile, household_data)
+
+
+        # Build content based on analysis type
+        if self.analysis_engine.analysis_type == AnalysisType.BENEFITS:
+            # For benefits analysis, show benefit components
+            additional_content = self._build_benefit_baseline(household_data)
+            # Also add tax information
+            additional_content += self._build_additional_taxes_content(profile, household_data)
+        else:
+            # For other analysis types, show additional taxes
+            additional_content = self._build_additional_taxes_content(profile, household_data)
         
         content = f"<p style='font-size: 18px; font-weight: bold; margin: 0;'>{baseline_label}: ${baseline_value:,.0f}</p>"
         content += additional_content
         
         self._render_styled_container("Baseline Values", content)
         st.markdown("<br>", unsafe_allow_html=True)
+
+
+    def _build_benefit_baseline(self, household_data: pd.Series) -> str:
+        """Build content for benefit components breakdown."""
+        # Define benefit columns to check
+        benefit_columns = ["Baseline Benefits", "Baseline Medicaid", "Baseline ACA PTC", "Baseline CHIP"]
+        
+        # Find benefit components with positive values
+        benefit_components = [
+            f"• {col.replace('Baseline ', 'Initial ')}: ${household_data[col]:,.0f}"
+            for col in benefit_columns
+            if col in household_data.index and pd.notna(household_data[col]) and household_data[col] > 0
+        ]
+        
+        if benefit_components:
+            return ("".join(f"<p style='margin: 2px 0 0 0;'>{component}</p>" for component in benefit_components))
+        return ""
 
     def _build_additional_taxes_content(self, profile: HouseholdProfile, household_data: pd.Series) -> str:
         """Build content for additional taxes section."""
@@ -1020,6 +1049,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-
