@@ -73,7 +73,7 @@ class AppConfig:
 class UIConfig:
     """UI styling and configuration constants."""
     # Use transparent background with subtle backdrop
-    CONTAINER_STYLE = "padding: 10px; border-radius: 5px; background-color: rgba(128, 128, 128, 0.1); backdrop-filter: brightness(0.95);"
+    CONTAINER_STYLE = "padding: 10px; border-radius: 5px; background-color: #F7FAFD; backdrop-filter: brightness(0.95);"
 
 @dataclass
 class FilterConfig:
@@ -511,9 +511,9 @@ class TaxAnalysisEngine:
         
         # Determine color based on analysis type and value
         if self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
-            color = "green" if change_value > 0 else "red"  # Income increase is good
+            color = "#29d40f" if change_value > 0 else "#b50d0d"
         else:
-            color = "red" if change_value > 0 else "green"  # Tax increase is bad
+            color = "#b50d0d" if change_value > 0 else "#29d40f"
             
         return change_value, pct_change, change_label, final_label, color, final_value
     
@@ -560,7 +560,7 @@ class VisualizationRenderer:
         """Helper method to render consistently styled containers."""
         st.markdown(f"""
         <div style="{UIConfig.CONTAINER_STYLE}">
-        <h4>{title}</h4>
+        <h4 style="color: #616161;">{title}</h4>
         {content}
         </div>
         """, unsafe_allow_html=True)
@@ -575,20 +575,20 @@ class VisualizationRenderer:
             ("Number of Dependents", f"{profile.number_of_dependents:.0f}"),
         ]
         
-        content = "".join(f"<p><strong>{label}:</strong> {value}</p>" for label, value in attributes)
+        content = "".join(f"<p style='color: #616161;><strong>{label}:</strong> {value}</p>" for label, value in attributes)
         
         # Add children's ages if any
         if profile.number_of_dependents > 0:
             dependent_ages = self._get_dependent_ages(household_data)
             if dependent_ages:
-                content += f"<p><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+                content += f"<p style='color: #616161;'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
         
         # Add marital status
         marital_info = self._get_marital_info(profile)
-        content += f"<p><strong>Marital Status:</strong> {marital_info}</p>"
+        content += f"<p style='color: #616161;'><strong>Marital Status:</strong> {marital_info}</p>"
         
         # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0;'>
+        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: #616161;'>
                      <strong> 💰 Gross Income:</strong> ${household_data['Gross Income']:,.0f}</p>"""
         
         # Add income sources
@@ -625,8 +625,8 @@ class VisualizationRenderer:
                 income_list.append(f"• {display_name}: ${amount:,.0f}")
         
         if income_list:
-            content = "<p><strong>Featured Income Sources:</strong></p>"
-            content += "".join(f"<p style='margin-left: 10px; margin-top: 2px;'>{income}</p>" 
+            content = "<p style='color: #616161;'><strong>Featured Income Sources:</strong></p>"
+            content += "".join(f"<p style='margin-left: 10px; margin-top: 2px; color: #616161;'>{income}</p>" 
                              for income in income_list)
             return content
         return ""
@@ -671,7 +671,7 @@ class VisualizationRenderer:
             # For other analysis types, show additional taxes
             additional_content = self._build_additional_taxes_content(profile, household_data)
         
-        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0;'>{baseline_label}: ${baseline_value:,.0f}</p>"
+        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: #616161;'>{baseline_label}: ${baseline_value:,.0f}</p>"
         content += additional_content
         
         self._render_styled_container("Baseline Values", content)
@@ -691,7 +691,7 @@ class VisualizationRenderer:
         ]
         
         if benefit_components:
-            return ("".join(f"<p style='margin: 2px 0 0 0;'>{component}</p>" for component in benefit_components))
+            return ("".join(f"<p style='margin: 2px 0 0 0; color: #616161;'>{component}</p>" for component in benefit_components))
         return ""
 
     def _build_additional_taxes_content(self, profile: HouseholdProfile, household_data: pd.Series) -> str:
@@ -724,8 +724,8 @@ class VisualizationRenderer:
         additional_taxes = [tax for tax in tax_mappings[self.analysis_engine.analysis_type] if tax is not None]
         
         if additional_taxes:
-            content = "<p style='margin: 10px 0 0 0;'><strong>Additional Information:</strong></p>"
-            content += "".join(f"<p style='margin: 2px 0 0 0;'>• {tax}</p>" for tax in additional_taxes)
+            content = "<p style='margin: 10px 0 0 0; color: #616161;'><strong>Additional Information:</strong></p>"
+            content += "".join(f"<p style='margin: 2px 0 0 0; color: #616161;'>• {tax}</p>" for tax in additional_taxes)
             return content
         return ""
 
@@ -737,7 +737,7 @@ class VisualizationRenderer:
         <p style="color: {color}; font-size: 18px; font-weight: bold;">
         {change_label}: ${change_value:,.0f} ({pct_change:+.1f}%)
         </p>
-        <p style="font-size: 18px; font-weight: bold; margin-top: 10px;">
+        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: #616161;">
         {final_label}: ${final_value:,.0f}
         </p>
         """
@@ -757,14 +757,14 @@ class VisualizationRenderer:
                 # Determine label and color based on analysis type
                 if self.analysis_engine.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
                     label = "Change" if self.analysis_engine.analysis_type == AnalysisType.BENEFITS else "Income Change"
-                    color = "green" if impact.total_change > 0 else "red"
+                    color = "#29d40f" if impact.total_change > 0 else "#b50d0d"
                 else:
                     label = "Tax Change"
-                    color = "green" if impact.total_change < 0 else "red"
+                    color = "#29d40f" if impact.total_change < 0 else "#b50d0d"
                 
                 st.markdown(f"""
-                <div style="padding: 8px; border-radius: 5px; background-color: rgba(128, 128, 128, 0.1); border: 1px solid rgba(128, 128, 128, 0.3); margin: 5px 0;">
-                <h5 style="color: var(--text-color, #595955); margin: 0 0 8px 0;">{impact.name}</h5>
+                <div style="padding: 8px; border-radius: 5px; background-color: #F7FAFD; border: 1px solid #BDBDBD; margin: 5px 0;">
+                <h5 style="color: #616161; margin: 0 0 8px 0;">{impact.name}</h5>
                 <p style="color: {color}; font-weight: bold; margin: 0;">
                 {label}: ${impact.total_change:,.0f}
                 </p>
@@ -810,12 +810,11 @@ class VisualizationRenderer:
         # Determine colors based on analysis type, sorry for the redundancy! It was simplest like this.
         if self.analysis_engine.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
             # For net income: increases are good (green), decreases are bad (red)
-            increasing_color = "green"
-            decreasing_color = "red"
+            increasing_color = "#29d40f"
+            decreasing_color = "#b50d0d"
         else:
-            # For taxes: increases are bad (red), decreases are good (green)
-            increasing_color = "red"
-            decreasing_color = "green"
+            increasing_color = "#b50d0d"
+            decreasing_color = "#29d40f"
         
         fig.add_trace(go.Waterfall(
             name=f"{chart_title} Impact",
@@ -825,10 +824,10 @@ class VisualizationRenderer:
             y=[item[1] for item in waterfall_data],
             text=[f"${item[1]:,.0f}" for item in waterfall_data],
             textposition="outside",
-            connector={"line": {"color": "rgb(63, 63, 63)"}},
+            connector={"line": {"color": "#616161"}},
             increasing={"marker": {"color": increasing_color}},
             decreasing={"marker": {"color": decreasing_color}},
-            totals={"marker": {"color": "blue"}}
+            totals={"marker": {"color": "#2C6496"}}
         ))
         
         fig.update_layout(
