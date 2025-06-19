@@ -642,21 +642,21 @@ def aca_enhanced_subsidies_reform():
 def snap_takeup_reform():
     return Reform.from_dict({
         "gov.usda.snap.takeup_rate": {
-            "2026-01-01.2028-12-31": 0.78
+            "2026-01-01.2028-12-31": 0.775
         },
     }, country_id="us")
 
 def aca_takeup_reform():
     return Reform.from_dict({
         "gov.aca.takeup_rate": {
-            "2026-01-01.2028-12-31": 0.622
+            "2026-01-01.2028-12-31": 0.63
         },
     }, country_id="us")
 
 def medicaid_takeup_reform():
     return Reform.from_dict({
         "gov.hhs.medicaid.takeup_rate": {
-            "2026-01-01.2028-12-31": 0.88
+            "2026-01-01.2028-12-31": 0.92
         },
     }, country_id="us")
 
