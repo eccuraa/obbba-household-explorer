@@ -66,7 +66,16 @@ class AppConfig:
         ("Self-Employment Income", "Self-Employment Income"),
         ("Tip Income", "Tip Income"),
         ("Overtime Income", "Overtime Income"),
-        ("Capital Gains", "Capital Gains")
+        ("Capital Gains", "Capital Gains"),
+        ("Dividend Income", "Dividend Income"),
+        ("Farm Income", "Farm Income"),
+        ("Taxable Interest Income", "Taxable Interest Income"),
+        ("Rental Income", "Rental Income"),
+        ("Taxable Unemployment Compensation", "Taxable Unemployment Compensation"),
+        ("Miscellaneous Income", "Miscellaneous Income"),
+        ("Taxable Retirement Distributions", "Taxable Retirement Distributions"),
+        ("Taxable Pension Income", "Taxable Pension Income"),
+        ("Taxable Social Security", "Taxable Social Security")
     ]
 
 
