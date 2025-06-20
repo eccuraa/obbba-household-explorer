@@ -47,7 +47,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     household_id = baseline.calculate("household_id", map_to="household", period=year).values
     state = baseline.calculate("state_code", map_to="household", period=year).values
     num_dependents = baseline.calculate("tax_unit_dependents", map_to="household", period=year).values
-    employment_income = baseline.calculate("employment_income", map_to="household", period=year).values
+    employment_income = baseline.calculate("irs_employment_income", map_to="household", period=year).values
     self_employment_income = baseline.calculate("self_employment_income", map_to="household", period=year).values
     capital_gains = baseline.calculate("capital_gains", map_to="household", period=year).values
     property_taxes = baseline.calculate("real_estate_taxes", map_to="household", period=year).values
@@ -58,6 +58,16 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     household_weight = baseline.calculate("household_weight", map_to="household", period=year).values
     gross_income = baseline.calculate("irs_gross_income", map_to="household", period=year).values
     social_security_benefits = baseline.calculate("social_security", map_to="household", period=year).values
+    dividend_income = baseline.calculate("dividend_income", map_to="household", period=year).values
+    farm_income = baseline.calculate("farm_income", map_to="household", period=year).values
+    taxable_interest_income = baseline.calculate("taxable_interest_income", map_to="household", period=year).values
+    rental_income = baseline.calculate("rental_income", map_to="household", period=year).values
+    taxable_unemployment_compensation = baseline.calculate("taxable_unemployment_compensation", map_to="household", period=year).values
+    miscellaneous_income = baseline.calculate("miscellaneous_income", map_to="household", period=year).values
+    taxable_retirement_distributions = baseline.calculate("taxable_retirement_distributions", map_to="household", period=year).values
+    taxable_pension_income = baseline.calculate("taxable_pension_income", map_to="household", period=year).values
+    taxable_social_security = baseline.calculate("taxable_social_security", map_to="household", period=year).values
+
 
     
     # Get person-level values
@@ -166,6 +176,15 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         'Employment Income': employment_income,
         'Self-Employment Income': self_employment_income,
         'Capital Gains': capital_gains,
+        'Dividend Income': dividend_income,
+        'Farm Income': farm_income,
+        'Taxable Interest Income': taxable_interest_income,
+        'Rental Income': rental_income,
+        'Taxable Unemployment Compensation': taxable_unemployment_compensation,
+        'Miscellaneous Income': miscellaneous_income,
+        'Taxable Retirement Distributions': taxable_retirement_distributions,
+        'Taxable Pension Income': taxable_pension_income,
+        'Taxable Social Security': taxable_social_security,
         'Property Taxes': property_taxes,
         'State Income Tax': state_income_tax,
         'Tip Income': tip_income,
