@@ -105,6 +105,7 @@ class FilterConfig:
     dependent_options: List[str]
     marital_options: List[str]
     single_tax_unit: bool
+    has_benefits_change: bool
 
     @classmethod
     def default(cls) -> 'FilterConfig':
@@ -138,7 +139,8 @@ class FilterConfig:
             },
             dependent_options=["All", "0", "1", "2", "3+"],
             marital_options=["All", "Married", "Single"],
-            single_tax_unit=False
+            single_tax_unit=False,
+            has_benefits_change=False
         )
 
 
@@ -264,7 +266,8 @@ class FilterManager:
                 self._apply_marital_filter,
                 self._apply_dependents_filter,
                 self._apply_age_filter,
-                self._apply_tax_unit_filter
+                self._apply_tax_unit_filter,
+                self._apply_benefits_change_filter
             ]
             
             for filter_method in filter_methods:
@@ -326,6 +329,13 @@ class FilterManager:
         selected = st.checkbox("Households with Only 1 Tax Unit", value=self.config.single_tax_unit)
         if selected:
             return df[df['Number of Tax Units'] == 1]
+        return df
+    
+    def _apply_benefits_change_filter(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply benefits change filter."""
+        selected = st.checkbox("Only Households with Medicaid Changes", value=self.config.has_benefits_change)
+        if selected:
+            return df[df['Change in Benefits after Medicaid Takeup Reform'] != 0]
         return df
     
     def _display_filter_results(self, df_filtered: pd.DataFrame, df_original: pd.DataFrame) -> None:
@@ -1071,4 +1081,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
