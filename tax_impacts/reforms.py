@@ -1629,7 +1629,7 @@ def get_all_senate_finance_reforms():
         "Senior Deduction Reform": senate_finance_senior_deduction_reform(),
         "Auto Loan Interest ALD": senate_finance_auto_loan_reform(),
         "CDCC Reform": senate_finance_cdcc_reform(),
-        "Salt Reform": senate_finance_salt_reform(),
+        "SALT Reform": senate_finance_salt_reform(),
         "SNAP Takeup Reform": senate_finance_snap_takeup_reform(),
         "ACA Takeup Reform": senate_finance_aca_takeup_reform(),
         "Medicaid Takeup Reform": senate_finance_medicaid_takeup_reform(),
