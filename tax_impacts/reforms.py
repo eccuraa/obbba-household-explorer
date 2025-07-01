@@ -668,14 +668,14 @@ def get_all_reforms():
         "Exemption Reform": hr1_exemption_reform(),
         "CTC Reform": hr1_ctc_reform(),
         "QBID Reform": hr1_qbi_reform(),
-        "Estate Tax Reform": hr1_estate_tax_reform(),
         "AMT Reform": hr1_amt_reform(),
         "Miscellaneous Reform": hr1_misc_reform(),
         "Other Itemized Deductions Reform": hr1_other_item_reform(),
         "Pease Reform": hr1_pease_reform(),
+        "Estate Tax Reform": hr1_estate_tax_reform(),
+        "Senior Deduction Reform": hr1_senior_deduction_reform(),
         "Tip Income Exempt": hr1_tip_reform(),
         "Overtime Income Exempt": hr1_overtime_reform(),
-        "Senior Deduction Reform": hr1_senior_deduction_reform(),
         "Auto Loan Interest ALD": hr1_auto_loan_reform(),
         "SALT Reform": hr1_salt_reform(),
         "ACA Enhanced Subsidies Reform": aca_enhanced_subsidies_reform(),
@@ -1587,7 +1587,36 @@ def senate_finance_cdcc_reform():
         }
     }, country_id="us")
 
-
+def senate_finance_aca_enhanced_subsidies_reform():
+    return Reform.from_dict({
+        "gov.aca.ptc_phase_out_rate[0].amount": {
+            "2026-01-01.2100-12-31": 0.02
+        },
+        "gov.aca.ptc_phase_out_rate[1].threshold": {
+            "2026-01-01.2100-12-31": 1.33
+        },
+        "gov.aca.ptc_phase_out_rate[1].amount": {
+            "2025-01-01.2100-12-31": 0.03
+        },
+        "gov.aca.ptc_phase_out_rate[2].amount": {
+            "2026-01-01.2100-12-31": 0.04
+        },
+        "gov.aca.ptc_phase_out_rate[3].amount": {
+            "2026-01-01.2100-12-31": 0.063
+        },
+        "gov.aca.ptc_phase_out_rate[4].amount": {
+            "2026-01-01.2100-12-31": 0.0805
+        },
+        "gov.aca.ptc_phase_out_rate[5].amount": {
+            "2026-01-01.2100-12-31": 0.095
+        },
+        "gov.aca.ptc_phase_out_rate[6].amount": {
+            "2026-01-01.2100-12-31": 0.095
+        },
+        "gov.aca.ptc_income_eligibility[2].amount": {
+            "2026-01-01.2100-12-31": False
+        }
+}, country_id="us")
 
 def senate_finance_snap_takeup_reform():
     return Reform.from_dict({
@@ -1619,17 +1648,18 @@ def get_all_senate_finance_reforms():
         "Exemption Reform": senate_finance_exemption_reform(),
         "CTC Reform": senate_finance_ctc_reform(),
         "QBID Reform": senate_finance_qbid_reform(),
-        "Estate Tax Reform": senate_finance_estate_tax_reform(),
         "AMT Reform": senate_finance_amt_reform(),
         "Miscellaneous Reform": senate_finance_misc_reform(),
         "Other Itemized Deductions Reform": senate_finance_other_item_reform(),
         "Pease Reform": senate_finance_pease_reform(),
+        "Estate Tax Reform": senate_finance_estate_tax_reform(),
+        "Senior Deduction Reform": senate_finance_senior_deduction_reform(),
         "Tip Income Exempt": senate_finance_tip_reform(),
         "Overtime Income Exempt": senate_finance_overtime_reform(),
-        "Senior Deduction Reform": senate_finance_senior_deduction_reform(),
         "Auto Loan Interest ALD": senate_finance_auto_loan_reform(),
-        "CDCC Reform": senate_finance_cdcc_reform(),
         "SALT Reform": senate_finance_salt_reform(),
+        "CDCC Reform": senate_finance_cdcc_reform(),
+        "ACA Enhanced Subsidies Reform": senate_finance_aca_enhanced_subsidies_reform(),
         "SNAP Takeup Reform": senate_finance_snap_takeup_reform(),
         "ACA Takeup Reform": senate_finance_aca_takeup_reform(),
         "Medicaid Takeup Reform": senate_finance_medicaid_takeup_reform(),
