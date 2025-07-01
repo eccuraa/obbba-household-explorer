@@ -950,7 +950,7 @@ class HouseholdDashboard:
         self.filter_manager = FilterManager(FilterConfig.default())
         # Add sidebar radio for bill selection
         self.data_source = st.sidebar.radio(
-            "Choose Tax Bill to Analyze:",
+            "Choose Bill Version:",
             ("House (HR1)", "Senate Finance"),
             index=0
         )
