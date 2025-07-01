@@ -30,7 +30,8 @@ class AnalysisType(Enum):
 
 class AppConfig:
     """Application-wide configuration constants."""
-    CSV_FILENAME = "household_tax_income_changes.csv"
+    HOUSE_CSV_FILENAME = "household_tax_income_changes.csv"
+    SENATE_CSV_FILENAME = "household_tax_income_changes_senate.csv"
     INCOME_CHANGE_THRESHOLD = 0.01
     SIGNIFICANT_IMPACT_THRESHOLD = 1000
     MODERATE_IMPACT_THRESHOLD = 100
@@ -188,35 +189,30 @@ class DataManager:
     
     @staticmethod
     @st.cache_data
-    def load_data() -> pd.DataFrame:
+    def load_data(csv_filename: str) -> pd.DataFrame:
         """
         Load and validate household data from CSV file.
-        
+        Args:
+            csv_filename (str): Path to the CSV file to load
         Returns:
             pd.DataFrame: Validated household data
-            
         Raises:
             FileNotFoundError: If CSV file is not found
             ValueError: If required columns are missing
         """
         try:
-            df = pd.read_csv(AppConfig.CSV_FILENAME)
-
-            
+            df = pd.read_csv(csv_filename)
             # Tried to create the percent change column, but might not have worked.
             # For benefits: handle cases where baseline benefits is zero
             pct_benefits_change = np.zeros_like(df["Baseline Benefits"])
             mask = df["Baseline Benefits"] != 0
             pct_benefits_change[mask] = (df['Total Change in Benefits'][mask] / np.abs(df["Baseline Benefits"][mask])) * 100
-            
             df['Percentage Change in Benefits'] = pct_benefits_change
-            
-            
             DataManager._validate_data(df)
-            logger.info(f"Successfully loaded {len(df)} household records")
+            logger.info(f"Successfully loaded {len(df)} household records from {csv_filename}")
             return df
         except FileNotFoundError:
-            st.error(f"Data file {AppConfig.CSV_FILENAME} not found")
+            st.error(f"Data file {csv_filename} not found")
             st.stop()
         except Exception as e:
             st.error(f"Error loading data: {str(e)}")
@@ -952,8 +948,17 @@ class HouseholdDashboard:
         self._configure_page()
         self.data_manager = DataManager()
         self.filter_manager = FilterManager(FilterConfig.default())
-        self.df = self.data_manager.load_data()
-        logger.info("Dashboard initialized successfully")
+        # Add sidebar radio for bill selection
+        self.data_source = st.sidebar.radio(
+            "Choose Bill Version:",
+            ("House (HR1)", "Senate Finance"),
+            index=0
+        )
+        if self.data_source == "House (HR1)":
+            csv_filename = AppConfig.HOUSE_CSV_FILENAME
+        else:
+            csv_filename = AppConfig.SENATE_CSV_FILENAME
+        self.df = self.data_manager.load_data(csv_filename)
     
     def _configure_page(self) -> None:
         """Configure Streamlit page settings."""
