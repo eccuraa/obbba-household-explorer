@@ -89,11 +89,12 @@ class UIConfig:
         "BLACK": "#000000",
         "BLUE_98": "#F7FAFD",
         "DARKEST_BLUE": "#0C1A27",
-        "GREEN": "#29d40f",
         "BLUE": "#2C6496",
         "DARK_RED": "#b50d0d",
+        "BLUE_PRESSED": "#17354F",
         "MEDIUM_LIGHT_GRAY": "#BDBDBD",
         "DARK_GRAY": "#616161",
+        "GRAY": "#808080",
         "WHITE": "#FFFFFF",
     }
 
@@ -528,9 +529,9 @@ class TaxAnalysisEngine:
         
         # Determine color based on analysis type and value
         if self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
-            color = UIConfig.colors['GREEN'] if change_value > 0 else UIConfig.colors['DARK_RED']
+            color = UIConfig.colors['BLUE'] if change_value > 0 else UIConfig.colors['GRAY']
         else:
-            color = UIConfig.colors['DARK_RED'] if change_value > 0 else UIConfig.colors['GREEN']
+            color = UIConfig.colors['GRAY'] if change_value > 0 else UIConfig.colors['BLUE']
             
         return change_value, pct_change, change_label, final_label, color, final_value
     
@@ -773,10 +774,10 @@ class VisualizationRenderer:
                 # Determine label and color based on analysis type
                 if self.analysis_engine.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
                     label = "Change" if self.analysis_engine.analysis_type == AnalysisType.BENEFITS else "Income Change"
-                    color = "UIConfig.colors['GREEN']" if impact.total_change > 0 else "UIConfig.colors['DARK_RED']"
+                    color = "UIConfig.colors['BLUE']" if impact.total_change > 0 else "UIConfig.colors['GRAY']"
                 else:
                     label = "Tax Change"
-                    color = "UIConfig.colors['GREEN']" if impact.total_change < 0 else "UIConfig.colors['DARK_RED']"
+                    color = "UIConfig.colors['BLUE']" if impact.total_change < 0 else "UIConfig.colors['GRAY']"
                 
                 st.markdown(f"""
                 <div style="padding: 8px; border-radius: 5px; background-color: UIConfig.colors['BLUE_98']; border: 1px solid UIConfig.colors['MEDIUM_LIGHT_GRAY']; margin: 5px 0;">
@@ -825,12 +826,12 @@ class VisualizationRenderer:
         
         # Determine colors based on analysis type, sorry for the redundancy! It was simplest like this.
         if self.analysis_engine.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
-            # For net income: increases are good (green), decreases are bad (red)
-            increasing_color = UIConfig.colors['GREEN']
-            decreasing_color = UIConfig.colors['DARK_RED']
+            # For net income: increases are good (blue), decreases are bad (dark gray)
+            increasing_color = UIConfig.colors['BLUE']
+            decreasing_color = UIConfig.colors['GRAY']
         else:
-            increasing_color = UIConfig.colors['DARK_RED']
-            decreasing_color = UIConfig.colors['GREEN']
+            increasing_color = UIConfig.colors['GRAY']
+            decreasing_color = UIConfig.colors['BLUE']
         
         fig.add_trace(go.Waterfall(
             name=f"{chart_title} Impact",
@@ -840,10 +841,10 @@ class VisualizationRenderer:
             y=[item[1] for item in waterfall_data],
             text=[f"${item[1]:,.0f}" for item in waterfall_data],
             textposition="outside",
-            connector={"line": {"color": UIConfig.colors['DARK_GRAY']}},
+            connector={"line": {"color": UIConfig.colors['DARKEST_BLUE']}},
             increasing={"marker": {"color": increasing_color}},
             decreasing={"marker": {"color": decreasing_color}},
-            totals={"marker": {"color": UIConfig.colors['BLUE']}}
+            totals={"marker": {"color": UIConfig.colors['DARKEST_BLUE']}},
         ))
         
         fig.update_layout(
@@ -886,58 +887,6 @@ class VisualizationRenderer:
         Currently, we are only displaying the {income_list} as featured income sources, with Employment Income including Tip and Overtime Income. 
         This is why these selected income sources will often not add up to the Gross Income total.
         """)
-
-
-class StoryGenerator:
-    """Generates journalist-friendly story summaries with proper error handling."""
-    
-    @staticmethod
-    def generate_story_summary(profile: HouseholdProfile, household_data: pd.Series, 
-                             impacts: List[ReformImpact]) -> str:
-        """
-        Generate a story summary for the selected household.
-        
-        Args:
-            profile: Household profile
-            household_data: Household data series
-            impacts: List of reform impacts
-            
-        Returns:
-            str: Formatted story summary
-        """
-        try:
-            # Extract numeric values with explicit conversion
-            income_change = float(household_data['Total Change in Net Income'])
-            income_pct_change = float(household_data['Percentage Change in Net Income'])
-            household_weight = float(profile.household_weight)
-            
-            # Determine impact level
-            abs_change = abs(income_change)
-            if abs_change > AppConfig.SIGNIFICANT_IMPACT_THRESHOLD:
-                impact_level = "significantly"
-            elif abs_change > AppConfig.MODERATE_IMPACT_THRESHOLD:
-                impact_level = "moderately"
-            else:
-                impact_level = "minimally"
-            
-            direction = "benefits from" if income_change > 0 else "is burdened by"
-            
-            # Format values separately to avoid f-string corruption
-            income_str = f"${income_change:,.0f}"
-            pct_str = f"({income_pct_change:+.1f}%)"
-            weight_str = f"{math.ceil(household_weight):,}"
-            
-            summary = (
-                f"**Quick Story Angle:** This {profile.state} household {impact_level} {direction} the HR1 bill, "
-                f"with a net income change of {income_str} {pct_str}. "
-                f"The household represents approximately {weight_str} similar American families."
-            )
-            
-            return summary
-            
-        except (ValueError, TypeError, KeyError) as e:
-            logger.error(f"Error generating story summary: {str(e)}")
-            return "**Quick Story Angle:** Error generating summary. Please try a different household."
 
 
 class HouseholdDashboard:
@@ -993,11 +942,6 @@ class HouseholdDashboard:
             # Render main content
             renderer = VisualizationRenderer(analysis_engine)
             renderer.render_main_content(profile, household_data)
-            
-            # Generate and display story summary
-            impacts = analysis_engine.get_reform_impacts(household_data)
-            story_summary = StoryGenerator.generate_story_summary(profile, household_data, impacts)
-            self._render_story_summary(story_summary)
 
             # Add analysis info card
             renderer.render_analysis_info_card()
@@ -1053,11 +997,6 @@ class HouseholdDashboard:
         except IndexError:
             st.error(f"Household ID {household_id} not found. Please try different filters.")
             st.stop()
-    
-    def _render_story_summary(self, story_summary: str) -> None:
-        """Render story summary section."""
-        st.subheader("📝 Story Summary")
-        st.info(story_summary)
 
 
 def main() -> None:
