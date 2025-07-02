@@ -188,20 +188,20 @@ def tcja_reform():
             "gov.irs.income.amt.exemption.phase_out.start.SURVIVING_SPOUSE": {
                 "2026-01-01.2026-12-31": 1271900,
             },
-            "gov.irs.deductions.itemized.limitation.applicable_amount.JOINT": {
-                "2026-01-01.2100-12-31": np.inf
+            "gov.irs.deductions.itemized.reduction.applies": {
+                "2026-01-01.2100-12-31": False
             },
-            "gov.irs.deductions.itemized.limitation.itemized_deduction_rate": {
-                "2026-01-01.2100-12-31": np.inf
+            "gov.irs.deductions.itemized.reduction.agi_threshold.SINGLE": {
+                "2026-01-01.2100-12-31": 0
             },
             "gov.irs.income.amt.exemption.phase_out.start.HEAD_OF_HOUSEHOLD": {
                 "2026-01-01.2026-12-31": 635900,
             },
-            "gov.irs.deductions.itemized.limitation.applicable_amount.SINGLE": {
-                "2026-01-01.2100-12-31": np.inf
+            "gov.irs.deductions.itemized.reduction.agi_threshold.JOINT": {
+                "2026-01-01.2100-12-31": 0
             },
-            "gov.irs.deductions.itemized.limitation.applicable_amount.SEPARATE": {
-                "2026-01-01.2100-12-31": np.inf
+            "gov.irs.deductions.itemized.reduction.agi_threshold.HEAD_OF_HOUSEHOLD": {
+                "2026-01-01.2100-12-31": 0
             },
             "gov.irs.deductions.itemized.salt_and_real_estate.cap.SURVIVING_SPOUSE": {
                 "2026-01-01.2100-12-31": 10_000
@@ -209,11 +209,11 @@ def tcja_reform():
             "gov.irs.deductions.itemized.salt_and_real_estate.cap.HEAD_OF_HOUSEHOLD": {
                 "2026-01-01.2100-12-31": 10_000
             },
-            "gov.irs.deductions.itemized.limitation.applicable_amount.SURVIVING_SPOUSE": {
-                "2026-01-01.2100-12-31": np.inf
+            "gov.irs.deductions.itemized.reduction.agi_threshold.SEPARATE": {
+                "2026-01-01.2100-12-31": 0
             },
-            "gov.irs.deductions.itemized.limitation.applicable_amount.HEAD_OF_HOUSEHOLD": {
-                "2026-01-01.2100-12-31": np.inf
+            "gov.irs.deductions.itemized.reduction.agi_threshold.SURVIVING_SPOUSE": {
+                "2026-01-01.2100-12-31": 0
             },
             "gov.irs.credits.estate.base": {
                 "2026-01-01.2026-12-31": 14200000,
@@ -1628,7 +1628,7 @@ def senate_finance_snap_takeup_reform():
 def senate_finance_aca_takeup_reform():
     return Reform.from_dict({
         "gov.aca.takeup_rate": {
-            "2026-01-01.2028-12-31": 0.63
+            "2026-01-01.2028-12-31": 0.655
         },
     }, country_id="us")
 
