@@ -1,7 +1,7 @@
 """
-HR1 Tax Bill - Household Impact Dashboard
+Reconciliation Bill - Household Impact Dashboard
 
-A Streamlit application for analyzing the impact of the HR1 tax bill on individual households.
+A Streamlit application for analyzing the impact of the reconciliation bill on individual households.
 Provides interactive filtering, analysis type selection, and detailed impact visualization.
 """
 
@@ -676,7 +676,7 @@ class VisualizationRenderer:
 
     def _render_baseline_info(self, profile: HouseholdProfile, household_data: pd.Series) -> None:
         """Render baseline tax/income information."""
-        st.subheader("🔄 HR1 Bill Impact Summary")
+        st.subheader("🔄 Reconciliation Bill Impact Summary")
         
         baseline_value, baseline_label = self.analysis_engine.get_baseline_info(profile, household_data)
 
@@ -931,7 +931,7 @@ class StoryGenerator:
             weight_str = f"{math.ceil(household_weight):,}"
             
             summary = (
-                f"**Quick Story Angle:** This {profile.state} household {impact_level} {direction} the HR1 bill, "
+                f"**Quick Story Angle:** This {profile.state} household {impact_level} {direction} the reconciliation bill, "
                 f"with a net income change of {income_str} {pct_str}. "
                 f"The household represents approximately {weight_str} similar American families."
             )
@@ -954,10 +954,10 @@ class HouseholdDashboard:
         # Add sidebar radio for bill selection
         self.data_source = st.sidebar.radio(
             "Choose Bill Version:",
-            ("House (HR1)", "Senate Finance"),
+            ("House", "Senate"),
             index=0
         )
-        if self.data_source == "House (HR1)":
+        if self.data_source == "House":
             csv_filename = AppConfig.HOUSE_CSV_FILENAME
         else:
             csv_filename = AppConfig.SENATE_CSV_FILENAME
@@ -966,7 +966,7 @@ class HouseholdDashboard:
     def _configure_page(self) -> None:
         """Configure Streamlit page settings."""
         st.set_page_config(
-            page_title="HR1 Tax Impact Dashboard",
+            page_title="Reconciliation Bill Impact Dashboard",
             layout="wide"
         )
     
@@ -1011,8 +1011,8 @@ class HouseholdDashboard:
     
     def _render_header(self) -> None:
         """Render dashboard header and title."""
-        st.title("HR1 Tax Bill - Household Impact Dashboard")
-        st.markdown("*Explore how the HR1 tax bill affects individual American households compared to current policy*")
+        st.title("Reconciliation Bill - Household Impact Dashboard")
+        st.markdown("*Explore how the reconciliation bill affects individual American households compared to current policy*")
         st.sidebar.header("Select Household")
 
 
