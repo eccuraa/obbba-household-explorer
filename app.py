@@ -587,9 +587,12 @@ class VisualizationRenderer:
         # Basic attributes
         attributes = [
             ("State", profile.state),
+            ("Household Size", f"{household_data['Household Size']:.0f}"),
             ("Number of Tax Units", f"{household_data['Number of Tax Units']:.0f}"),
             ("Head of Household Age", f"{profile.age_of_head:.0f} years"),
             ("Number of Dependents", f"{profile.number_of_dependents:.0f}"),
+            ("Number of People with SSN Card (Citizen/EAD)", f"{household_data['Num with SSN Card (Citizen/EAD)']:.0f}"),
+            ("Number of People with SSN Card (Other/None)", f"{household_data['Num with SSN Card (Other/None)']:.0f}"),
         ]
         
         content = "".join(f"<p style='color: UIConfig.colors['DARKEST_BLUE'];><strong>{label}:</strong> {value}</p>" for label, value in attributes)

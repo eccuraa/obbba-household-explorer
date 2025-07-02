@@ -46,6 +46,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     # Get household-level characteristics
     household_id = baseline.calculate("household_id", map_to="household", period=year).values
     state = baseline.calculate("state_code", map_to="household", period=year).values
+    household_size = baseline.calculate("household_size", map_to="household", period=year).values
     num_dependents = baseline.calculate("tax_unit_dependents", map_to="household", period=year).values
     employment_income = baseline.calculate("irs_employment_income", map_to="household", period=year).values
     self_employment_income = baseline.calculate("self_employment_income", map_to="household", period=year).values
@@ -57,6 +58,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     auto_loan_interest = baseline.calculate("auto_loan_interest", map_to="household", period=year).values
     household_weight = baseline.calculate("household_weight", map_to="household", period=year).values
     gross_income = baseline.calculate("irs_gross_income", map_to="household", period=year).values
+    agi = baseline.calculate("adjusted_gross_income", map_to="household", period=year).values
     social_security_benefits = baseline.calculate("social_security", map_to="household", period=year).values
     dividend_income = baseline.calculate("dividend_income", map_to="household", period=year).values
     farm_income = baseline.calculate("farm_income", map_to="household", period=year).values
@@ -78,6 +80,8 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     is_dependent = baseline.calculate("is_tax_unit_dependent", map_to="person", period=year).values
     tax_unit_id = baseline.calculate("tax_unit_id", map_to="person", period=year).values
     is_married = baseline.calculate("is_married", map_to="person", period=year).values
+    # Add ssn_card_type
+    ssn_card_type = baseline.calculate("ssn_card_type", map_to="person", period=year).values
 
 
     # Create a DataFrame with person-level data
@@ -89,6 +93,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         'is_head': is_head,
         'is_spouse': is_spouse,
         'is_married': is_married,
+        'ssn_card_type': ssn_card_type,
     })
 
 
@@ -163,16 +168,28 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         )
 
 
+    # --- SSN Card Type household counts ---
+    # CITIZEN or NON_CITIZEN_VALID_EAD
+    ssn_citizen_ead = person_df[person_df['ssn_card_type'].isin(['CITIZEN', 'NON_CITIZEN_VALID_EAD'])].groupby('household_id').size()
+    # OTHER_NON_CITIZEN or NONE
+    ssn_other_none = person_df[person_df['ssn_card_type'].isin(['OTHER_NON_CITIZEN', 'NONE'])].groupby('household_id').size()
+    # Reindex to all households, fill missing with 0
+    ssn_citizen_ead = ssn_citizen_ead.reindex(household_id, fill_value=0).values
+    ssn_other_none = ssn_other_none.reindex(household_id, fill_value=0).values
+
     # Initialize results dictionary
     results = {
         'Household ID': household_id,
         'State': state,
+        'Household Size': household_size,
         'Number of Tax Units': num_tax_units,  
         'Age of Head': age_head,
         'Age of Spouse': age_spouse,
         **dependent_age_columns,  # Add dependent ages from first tax unit
         'Number of Dependents': num_dependents,
         'Is Married': is_married,
+        'Num with SSN Card (Citizen/EAD)': ssn_citizen_ead,
+        'Num with SSN Card (Other/None)': ssn_other_none,
         'Employment Income': employment_income,
         'Self-Employment Income': self_employment_income,
         'Capital Gains': capital_gains,
@@ -192,6 +209,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         'Auto Loan Interest': auto_loan_interest,
         'Social Security Benefits': social_security_benefits,
         'Gross Income': gross_income,
+        'Adjusted Gross Income': agi,
         'Baseline Federal Tax Liability': baseline_income_tax,
         'Baseline Net Income': baseline_net_income,
         'Baseline Benefits': baseline_benefits,
