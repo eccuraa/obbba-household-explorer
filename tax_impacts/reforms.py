@@ -526,7 +526,7 @@ def hr1_other_item_reform():
         }
     }, country_id="us")
 
-def hr1_pease_reform():
+def hr1_limitation_on_itemized_deductions_reform():
     return Reform.from_dict({
         "gov.contrib.reconciliation.pease.in_effect": {
             "2026-01-01.2100-12-31": True
@@ -671,7 +671,7 @@ def get_all_reforms():
         "AMT Reform": hr1_amt_reform(),
         "Miscellaneous Reform": hr1_misc_reform(),
         "Other Itemized Deductions Reform": hr1_other_item_reform(),
-        "Pease Reform": hr1_pease_reform(),
+        "Limitation on Itemized Deductions Reform": hr1_limitation_on_itemized_deductions_reform(),
         "Estate Tax Reform": hr1_estate_tax_reform(),
         "Senior Deduction Reform": hr1_senior_deduction_reform(),
         "Tip Income Exempt": hr1_tip_reform(),
@@ -1471,8 +1471,8 @@ def senate_finance_other_item_reform():
     }, country_id="us")
 
 
-def senate_finance_pease_reform():
-    """Pease limitation reform from Senate Finance package."""
+def senate_finance_limitation_on_itemized_deductions_reform():
+    """Limitation on itemized deductions reform from Senate Finance package."""
     return Reform.from_dict({
         "gov.contrib.reconciliation.pease.in_effect": {
             "2026-01-01.2100-12-31": True
@@ -1651,7 +1651,7 @@ def get_all_senate_finance_reforms():
         "AMT Reform": senate_finance_amt_reform(),
         "Miscellaneous Reform": senate_finance_misc_reform(),
         "Other Itemized Deductions Reform": senate_finance_other_item_reform(),
-        "Pease Reform": senate_finance_pease_reform(),
+        "Limitation on Itemized Deductions Reform": senate_finance_limitation_on_itemized_deductions_reform(),
         "Estate Tax Reform": senate_finance_estate_tax_reform(),
         "Senior Deduction Reform": senate_finance_senior_deduction_reform(),
         "Tip Income Exempt": senate_finance_tip_reform(),
