@@ -117,6 +117,9 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
     taxable_unemployment_compensation = baseline.calculate(
         "taxable_unemployment_compensation", map_to="household", period=year
     ).values
+    household_market_income = baseline.calculate(
+        "household_market_income", map_to="household", period=year
+    ).values
     miscellaneous_income = baseline.calculate(
         "miscellaneous_income", map_to="household", period=year
     ).values
@@ -309,6 +312,7 @@ def calculate_stacked_household_impacts(reforms, baseline_reform, year):
         "Social Security Benefits": social_security_benefits,
         "Gross Income": gross_income,
         "Adjusted Gross Income": agi,
+        "Market Income": household_market_income,
         "Baseline Federal Tax Liability": baseline_income_tax,
         "Baseline Net Income": baseline_net_income,
         "Baseline Benefits": baseline_benefits,
