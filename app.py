@@ -1232,6 +1232,66 @@ class HouseholdDashboard:
             border: 1px solid #3378b2 !important;
             background-color: white !important;
         }
+        
+        /* Button hover styling */
+        .stButton > button:hover {
+            background-color: #3378b2 !important;
+            border-color: #3378b2 !important;
+            color: white !important;
+        }
+        
+        /* Dropdown/selectbox hover styling */
+        .stSelectbox > div > div:hover {
+            border-color: #3378b2 !important;
+        }
+        
+        /* Selectbox option hover */
+        .stSelectbox > div > div > div > div:hover {
+            background-color: #3378b2 !important;
+            color: white !important;
+        }
+        
+        /* Number input hover */
+        .stNumberInput > div > div:hover {
+            border-color: #3378b2 !important;
+        }
+        
+        /* Text input hover */
+        .stTextInput > div > div:hover {
+            border-color: #3378b2 !important;
+        }
+        
+        /* Dropdown button styling */
+        .st-emotion-cache-p5msec {
+            position: relative;
+            display: flex;
+            width: 100%;
+            font-size: 14px;
+            padding: 0.75rem 1rem;
+            list-style-type: none;
+            border-radius: 8px;
+        }
+        
+        .st-emotion-cache-p5msec:hover {
+            color: #3378b2 !important;
+        }
+        
+        /* Checkbox styling */
+        .stCheckbox > div > label > div:first-child > div {
+            background-color: #3378b2 !important;
+            border-color: #3378b2 !important;
+        }
+        
+        .stCheckbox > div > label > div:first-child > div > div {
+            background-color: white !important;
+            border: 1px solid #3378b2 !important;
+        }
+        
+        /* Specific checkbox class styling */
+        .st-e9.st-bf.st-bg.st-ea.st-bd.st-b5.st-eb.st-ec.st-c6.st-cj.st-ck.st-cl.st-cm.st-cf.st-cg.st-ch.st-ci.st-ev.st-ew.st-ex.st-ey.st-au.st-av.st-ax.st-aw.st-eh.st-d9.st-bc.st-ez.st-az.st-ei.st-ej.st-ek.st-el.st-aq.st-ba.st-em.st-en {
+            background-color: #3378b2 !important;
+            border-color: #3378b2 !important;
+        }
         </style>
         """, unsafe_allow_html=True)
 
