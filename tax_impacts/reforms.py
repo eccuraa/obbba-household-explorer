@@ -2,6 +2,14 @@ import numpy as np
 from policyengine_core.reforms import Reform
 
 
+def current_law_baseline():
+    """
+    Returns a baseline with no reforms (current law).
+    This represents the default PolicyEngine US baseline for 2026.
+    """
+    return Reform.from_dict({})
+
+
 def tcja_reform():
 
     return Reform.from_dict(
@@ -523,6 +531,9 @@ def hr1_other_item_reform():
             },
             "gov.irs.deductions.itemized.charity.non_itemizers_amount.HEAD_OF_HOUSEHOLD": {
                 "2025-01-01.2028-12-31": 150
+            },
+            "gov.irs.deductions.itemized.casualty.active": {
+                "2026-01-01.2100-12-31": False
             },
         },
         country_id="us",
@@ -1476,6 +1487,15 @@ def senate_finance_other_item_reform():
             },
             "gov.irs.deductions.itemized.casualty.active": {
                 "2026-01-01.2100-12-31": False
+            },
+            "gov.irs.deductions.itemized.charity.ceiling.all": {
+                "2026-01-01.2100-12-31": 0.6
+            },
+            "gov.irs.deductions.itemized.charity.ceiling.non_cash": {
+                "2026-01-01.2100-12-31": 0.5
+            },
+            "gov.contrib.reconciliation.charitable_donations.in_effect": {
+                "2026-01-01.2100-12-31": True
             },
         },
         country_id="us",

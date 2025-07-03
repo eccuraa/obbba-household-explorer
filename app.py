@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +33,15 @@ class AnalysisType(Enum):
 class AppConfig:
     """Application-wide configuration constants."""
 
+    # CSV file mappings for different baselines and reform types
+    CSV_FILES = {
+        ("Current Law", "House"): "household_tax_income_changes_current_law_baseline.csv",
+        ("Current Law", "Senate"): "household_tax_income_changes_senate_current_law_baseline.csv", 
+        ("Current Policy", "House"): "household_tax_income_changes_tcja_baseline.csv",
+        ("Current Policy", "Senate"): "household_tax_income_changes_senate_tcja_baseline.csv",
+    }
+    
+    # Legacy filenames for backward compatibility
     HOUSE_CSV_FILENAME = "household_tax_income_changes.csv"
     SENATE_CSV_FILENAME = "household_tax_income_changes_senate.csv"
     INCOME_CHANGE_THRESHOLD = 0.01
@@ -688,7 +698,7 @@ class VisualizationRenderer:
         st.markdown(
             f"""
         <div style="{UIConfig.CONTAINER_STYLE}">
-        <h4 style="color: UIConfig.colors['DARKEST_BLUE'];">{title}</h4>
+        <h4 style="color: UIConfig.colors['TEAL_ACCENT'];">{title}</h4>
         {content}
         </div>
         """,
@@ -717,7 +727,7 @@ class VisualizationRenderer:
         ]
 
         content = "".join(
-            f"<p style='color: UIConfig.colors['DARKEST_BLUE'];><strong>{label}:</strong> {value}</p>"
+            f"<p style='color: UIConfig.colors['TEAL_ACCENT'];><strong>{label}:</strong> {value}</p>"
             for label, value in attributes
         )
 
@@ -725,14 +735,14 @@ class VisualizationRenderer:
         if profile.number_of_dependents > 0:
             dependent_ages = self._get_dependent_ages(household_data)
             if dependent_ages:
-                content += f"<p style='color: UIConfig.colors['DARKEST_BLUE'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+                content += f"<p style='color: UIConfig.colors['TEAL_ACCENT'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
 
         # Add marital status
         marital_info = self._get_marital_info(profile)
-        content += f"<p style='color: UIConfig.colors['DARKEST_BLUE'];'><strong>Marital Status:</strong> {marital_info}</p>"
+        content += f"<p style='color: UIConfig.colors['TEAL_ACCENT'];'><strong>Marital Status:</strong> {marital_info}</p>"
 
         # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['DARKEST_BLUE'];'>
+        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['TEAL_ACCENT'];'>
                      <strong> 💰 Gross Income:</strong> ${household_data['Gross Income']:,.0f}</p>"""
 
         # Add income sources
@@ -831,7 +841,7 @@ class VisualizationRenderer:
                 profile, household_data
             )
 
-        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: UIConfig.colors['DARKEST_BLUE'];'>{baseline_label}: ${baseline_value:,.0f}</p>"
+        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: UIConfig.colors['TEAL_ACCENT'];'>{baseline_label}: ${baseline_value:,.0f}</p>"
         content += additional_content
 
         self._render_styled_container("Baseline Values", content)
@@ -858,7 +868,7 @@ class VisualizationRenderer:
 
         if benefit_components:
             return "".join(
-                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['DARKEST_BLUE'];'>{component}</p>"
+                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'>{component}</p>"
                 for component in benefit_components
             )
         return ""
@@ -899,9 +909,9 @@ class VisualizationRenderer:
         ]
 
         if additional_taxes:
-            content = "<p style='margin: 10px 0 0 0; color: UIConfig.colors['DARKEST_BLUE'];'><strong>Additional Information:</strong></p>"
+            content = "<p style='margin: 10px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'><strong>Additional Information:</strong></p>"
             content += "".join(
-                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['DARKEST_BLUE'];'>• {tax}</p>"
+                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'>• {tax}</p>"
                 for tax in additional_taxes
             )
             return content
@@ -913,11 +923,17 @@ class VisualizationRenderer:
             self.analysis_engine.get_change_info(household_data)
         )
 
+        # Override color for positive changes to use TEAL_ACCENT
+        if change_value > 0:
+            impact_color = UIConfig.colors["TEAL_ACCENT"]
+        else:
+            impact_color = UIConfig.colors["DARKEST_BLUE"]
+
         content = f"""
-        <p style="color: {color}; font-size: 18px; font-weight: bold;">
+        <p style="color: {impact_color}; font-size: 18px; font-weight: bold;">
         {change_label}: ${change_value:,.0f} ({pct_change:+.1f}%)
         </p>
-        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: UIConfig.colors['DARKEST_BLUE'];">
+        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: UIConfig.colors['TEAL_ACCENT'];">
         {final_label}: ${final_value:,.0f}
         </p>
         """
@@ -962,7 +978,7 @@ class VisualizationRenderer:
                 st.markdown(
                     f"""
                 <div style="padding: 8px; border-radius: 5px; background-color: UIConfig.colors['BLUE_98']; border: 1px solid UIConfig.colors['MEDIUM_LIGHT_GRAY']; margin: 5px 0;">
-                <h5 style="color: UIConfig.colors['DARKEST_BLUE']; margin: 0 0 8px 0;">{impact.name}</h5>
+                <h5 style="color: UIConfig.colors['TEAL_ACCENT']; margin: 0 0 8px 0;">{impact.name}</h5>
                 <p style="color: {color}; font-weight: bold; margin: 0;">
                 {label}: ${impact.total_change:,.0f}
                 </p>
@@ -1109,21 +1125,114 @@ class HouseholdDashboard:
         self._configure_page()
         self.data_manager = DataManager()
         self.filter_manager = FilterManager(FilterConfig.default())
-        # Add sidebar radio for bill selection
-        self.data_source = st.sidebar.radio(
-            "Choose Bill Version:", ("House", "Senate"), index=0
+        
+        # Add sidebar radio buttons for baseline and reform type selection
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("Analysis Configuration")
+        
+        # Baseline selection
+        self.baseline = st.sidebar.radio(
+            "Choose Baseline:", ("Current Law", "Current Policy"), index=0
         )
-        if self.data_source == "House":
-            csv_filename = AppConfig.HOUSE_CSV_FILENAME
+        
+        # Reform type selection  
+        self.reform_type = st.sidebar.radio(
+            "Choose Reform Type:", ("House", "Senate"), index=0
+        )
+        
+        # Load appropriate CSV file based on selections
+        csv_filename = AppConfig.CSV_FILES.get((self.baseline, self.reform_type))
+        if csv_filename and os.path.exists(csv_filename):
+            self.df = self.data_manager.load_data(csv_filename)
         else:
-            csv_filename = AppConfig.SENATE_CSV_FILENAME
-        self.df = self.data_manager.load_data(csv_filename)
+            # Fallback to legacy files if new files don't exist
+            if self.reform_type == "House":
+                csv_filename = AppConfig.HOUSE_CSV_FILENAME
+            else:
+                csv_filename = AppConfig.SENATE_CSV_FILENAME
+            self.df = self.data_manager.load_data(csv_filename)
+            
+            # Show warning if using fallback files
+            st.warning(f"Using fallback file: {csv_filename}. The selected baseline ({self.baseline}) may not be available.")
 
     def _configure_page(self) -> None:
         """Configure Streamlit page settings."""
         st.set_page_config(
             page_title="Reconciliation Bill Impact Dashboard", layout="wide"
         )
+        
+        # Add custom CSS for radio button styling
+        st.markdown("""
+        <style>
+        .stRadio > div[role="radiogroup"] > label > div:first-child, .stCheckbox > div > label > div:first-child {
+            background-color: #3378b2 !important;
+        }
+        .stRadio > div[role="radiogroup"] > label > div:first-child > div, .stCheckbox > div > label > div:first-child > div {
+            border: 1px solid #3378b2 !important;
+            background-color: white !important;
+        }
+        
+        /* Button hover styling */
+        .stButton > button:hover {
+            background-color: #3378b2 !important;
+            border-color: #3378b2 !important;
+            color: white !important;
+        }
+        
+        /* Dropdown/selectbox hover styling */
+        .stSelectbox > div > div:hover {
+            border-color: #3378b2 !important;
+        }
+        
+        /* Selectbox option hover */
+        .stSelectbox > div > div > div > div:hover {
+            background-color: #3378b2 !important;
+            color: white !important;
+        }
+        
+        /* Number input hover */
+        .stNumberInput > div > div:hover {
+            border-color: #3378b2 !important;
+        }
+        
+        /* Text input hover */
+        .stTextInput > div > div:hover {
+            border-color: #3378b2 !important;
+        }
+        
+        /* Dropdown button styling */
+        .st-emotion-cache-p5msec {
+            position: relative;
+            display: flex;
+            width: 100%;
+            font-size: 14px;
+            padding: 0.75rem 1rem;
+            list-style-type: none;
+            border-radius: 8px;
+        }
+        
+        .st-emotion-cache-p5msec:hover {
+            color: #3378b2 !important;
+        }
+        
+        /* Checkbox styling */
+        .stCheckbox > div > label > div:first-child > div {
+            background-color: #3378b2 !important;
+            border-color: #3378b2 !important;
+        }
+        
+        .stCheckbox > div > label > div:first-child > div > div {
+            background-color: white !important;
+            border: 1px solid #3378b2 !important;
+        }
+        
+        /* Specific checkbox class styling */
+        .st-e9.st-bf.st-bg.st-ea.st-bd.st-b5.st-eb.st-ec.st-c6.st-cj.st-ck.st-cl.st-cm.st-cf.st-cg.st-ch.st-ci.st-ev.st-ew.st-ex.st-ey.st-au.st-av.st-ax.st-aw.st-eh.st-d9.st-bc.st-ez.st-az.st-ei.st-ej.st-ek.st-el.st-aq.st-ba.st-em.st-en {
+            background-color: #3378b2 !important;
+            border-color: #3378b2 !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
     def run(self) -> None:
         """
@@ -1163,7 +1272,7 @@ class HouseholdDashboard:
         """Render dashboard header and title."""
         st.title("Reconciliation Bill - Household Impact Dashboard")
         st.markdown(
-            "*Explore how the reconciliation bill affects individual American households compared to current policy*"
+            f"*Exploring {self.reform_type} reforms vs {self.baseline} baseline - How the reconciliation bill affects individual American households*"
         )
         st.sidebar.header("Select Household")
 
