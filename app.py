@@ -1067,33 +1067,33 @@ class VisualizationRenderer:
         with col1:
             # Basic demographic info
             content1 = f"""
-            <p style='color: var(--text-color, #000000);'><strong>State:</strong> {profile.state}</p>
-            <p style='color: var(--text-color, #000000);'><strong>Household Size:</strong> {household_data['Household Size']:.0f}</p>
-            <p style='color: var(--text-color, #000000);'><strong>Number of Tax Units:</strong> {household_data['Number of Tax Units']:.0f}</p>
-            <p style='color: var(--text-color, #000000);'><strong>Head of Household Age:</strong> {profile.age_of_head:.0f} years</p>
+            <p style='color: var(--text-color);'><strong>State:</strong> {profile.state}</p>
+            <p style='color: var(--text-color);'><strong>Household Size:</strong> {household_data['Household Size']:.0f}</p>
+            <p style='color: var(--text-color);'><strong>Number of Tax Units:</strong> {household_data['Number of Tax Units']:.0f}</p>
+            <p style='color: var(--text-color);'><strong>Head of Household Age:</strong> {profile.age_of_head:.0f} years</p>
             """
 
             # Add marital info
-            content1 += f"<p style='color: var(--text-color, #000000);'><strong>Marital Status:</strong> {self._get_marital_info(profile, household_data)}</p>"
+            content1 += f"<p style='color: var(--text-color);'><strong>Marital Status:</strong> {self._get_marital_info(profile, household_data)}</p>"
 
             st.markdown(content1, unsafe_allow_html=True)
 
         with col2:
             # Family and citizenship info
             content2 = f"""
-            <p style='color: var(--text-color, #000000);'><strong>Number of Dependents:</strong> {profile.number_of_dependents:.0f}</p>
+            <p style='color: var(--text-color);'><strong>Number of Dependents:</strong> {profile.number_of_dependents:.0f}</p>
             """
 
             # Add children's ages if any
             if profile.number_of_dependents > 0:
                 dependent_ages = self._get_dependent_ages(household_data)
                 if dependent_ages:
-                    content2 += f"<p style='color: var(--text-color, #000000);'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+                    content2 += f"<p style='color: var(--text-color);'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
 
             content2 += f"""
-            <p style='color: var(--text-color, #000000);'><strong>People with SSN Card (Citizen/EAD):</strong> {household_data['Num with SSN Card (Citizen/EAD)']:.0f}</p>
-            <p style='color: var(--text-color, #000000);'><strong>People with SSN Card (Other/None):</strong> {household_data['Num with SSN Card (Other/None)']:.0f}</p>
-            <p style='color: var(--text-color, #000000);'><strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>
+            <p style='color: var(--text-color);'><strong>People with SSN Card (Citizen/EAD):</strong> {household_data['Num with SSN Card (Citizen/EAD)']:.0f}</p>
+            <p style='color: var(--text-color);'><strong>People with SSN Card (Other/None):</strong> {household_data['Num with SSN Card (Other/None)']:.0f}</p>
+            <p style='color: var(--text-color);'><strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>
             """
 
             st.markdown(content2, unsafe_allow_html=True)
