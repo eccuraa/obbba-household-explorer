@@ -1115,7 +1115,7 @@ class VisualizationRenderer:
     ) -> None:
         """Render the new 5x4 impact summary table."""
         st.markdown("---")
-        st.subheader("Financial Impact Summary")
+        st.subheader(f"Financial Impact Breakdown of {self.reform_type} OBBB Against {self.baseline}")
         
         # Prepare data for the table
         table_data = []
@@ -1409,16 +1409,15 @@ class HouseholdDashboard:
 
     def _render_header(self) -> None:
         """Render dashboard header and title."""
-        st.title("Reconciliation Bill - Household Impact Dashboard")
+        st.title("OBBBA Household Explorer")
         st.markdown(
-            f"*Exploring {self.reform_type} reforms vs {self.baseline} baseline - How the reconciliation bill affects individual American households*"
+            f"*Explore how the reconciliation bill affects individual households across America*"
         )
         st.sidebar.header("Select Household")
 
     def _render_analysis_type_selector_main(self, household_data: pd.Series) -> AnalysisType:
         """Render analysis type selector in main content with percent changes."""
         st.markdown("---")
-        st.subheader("Analysis Type")
 
         type_mapping = {
             analysis_type.value: analysis_type for analysis_type in AnalysisType
@@ -1432,7 +1431,7 @@ class HouseholdDashboard:
             label = f"{display_value} ({pct:+.1f}%)"
             options.append(label)
 
-        selected = st.radio("Select what to analyze:", options, index=0, horizontal=True)
+        selected = st.radio("Select Impact Breakdown:", options, index=0, horizontal=True)
         selected_type = type_mapping[selected.split(" (")[0]]
         st.session_state.analysis_type = selected_type
         return selected_type
