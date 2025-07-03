@@ -1172,11 +1172,17 @@ class HouseholdDashboard:
             background-color: white !important;
         }
         
-        /* Button hover styling */
+        /* Button hover styling - only change text color, not background */
         .stButton > button:hover {
-            background-color: #3378b2 !important;
             border-color: #3378b2 !important;
-            color: white !important;
+            color: #3378b2 !important;
+        }
+        
+        /* Button active/click styling - no color changes */
+        .stButton > button:active {
+            background-color: inherit !important;
+            border-color: inherit !important;
+            color: inherit !important;
         }
         
         /* Dropdown/selectbox hover styling */
