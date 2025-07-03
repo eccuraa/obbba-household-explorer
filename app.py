@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +33,15 @@ class AnalysisType(Enum):
 class AppConfig:
     """Application-wide configuration constants."""
 
+    # CSV file mappings for different baselines and reform types
+    CSV_FILES = {
+        ("Current Law", "House"): "household_tax_income_changes_current_law_baseline.csv",
+        ("Current Law", "Senate"): "household_tax_income_changes_senate_current_law_baseline.csv", 
+        ("Current Policy", "House"): "household_tax_income_changes_tcja_baseline.csv",
+        ("Current Policy", "Senate"): "household_tax_income_changes_senate_tcja_baseline.csv",
+    }
+    
+    # Legacy filenames for backward compatibility
     HOUSE_CSV_FILENAME = "household_tax_income_changes.csv"
     SENATE_CSV_FILENAME = "household_tax_income_changes_senate.csv"
     INCOME_CHANGE_THRESHOLD = 0.01
@@ -1162,15 +1172,35 @@ class HouseholdDashboard:
         self._configure_page()
         self.data_manager = DataManager()
         self.filter_manager = FilterManager(FilterConfig.default())
-        # Add sidebar radio for bill selection
-        self.data_source = st.sidebar.radio(
-            "Choose Bill Version:", ("House", "Senate"), index=0
+        
+        # Add sidebar radio buttons for baseline and reform type selection
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("Analysis Configuration")
+        
+        # Baseline selection
+        self.baseline = st.sidebar.radio(
+            "Choose Baseline:", ("Current Law", "Current Policy"), index=0
         )
-        if self.data_source == "House":
-            csv_filename = AppConfig.HOUSE_CSV_FILENAME
+        
+        # Reform type selection  
+        self.reform_type = st.sidebar.radio(
+            "Choose Reform Type:", ("House", "Senate"), index=0
+        )
+        
+        # Load appropriate CSV file based on selections
+        csv_filename = AppConfig.CSV_FILES.get((self.baseline, self.reform_type))
+        if csv_filename and os.path.exists(csv_filename):
+            self.df = self.data_manager.load_data(csv_filename)
         else:
-            csv_filename = AppConfig.SENATE_CSV_FILENAME
-        self.df = self.data_manager.load_data(csv_filename)
+            # Fallback to legacy files if new files don't exist
+            if self.reform_type == "House":
+                csv_filename = AppConfig.HOUSE_CSV_FILENAME
+            else:
+                csv_filename = AppConfig.SENATE_CSV_FILENAME
+            self.df = self.data_manager.load_data(csv_filename)
+            
+            # Show warning if using fallback files
+            st.warning(f"Using fallback file: {csv_filename}. The selected baseline ({self.baseline}) may not be available.")
 
     def _configure_page(self) -> None:
         """Configure Streamlit page settings."""
@@ -1223,7 +1253,7 @@ class HouseholdDashboard:
         """Render dashboard header and title."""
         st.title("Reconciliation Bill - Household Impact Dashboard")
         st.markdown(
-            "*Explore how the reconciliation bill affects individual American households compared to current policy*"
+            f"*Exploring {self.reform_type} reforms vs {self.baseline} baseline - How the reconciliation bill affects individual American households*"
         )
         st.sidebar.header("Select Household")
 
