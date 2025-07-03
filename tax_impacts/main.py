@@ -5,7 +5,12 @@ Analyzes 2026 tax year using enhanced CPS dataset.
 """
 
 from datetime import datetime
-from reforms import tcja_reform, current_law_baseline, get_all_reforms, get_all_senate_finance_reforms
+from reforms import (
+    tcja_reform,
+    current_law_baseline,
+    get_all_reforms,
+    get_all_senate_finance_reforms,
+)
 from analysis import calculate_stacked_household_impacts
 
 
@@ -25,7 +30,7 @@ def main():
     print("ANALYSIS 1: Current Law Baseline")
     print("=" * 50)
     baseline_reform = current_law_baseline()
-    
+
     print(f"Analyzing {len(reforms)} reform components against Current Law baseline:")
     for i, reform_name in enumerate(reforms.keys(), 1):
         print(f"  {i}. {reform_name}")
@@ -57,9 +62,13 @@ def main():
     df_senate_current_law = calculate_stacked_household_impacts(
         reforms=senate_reforms, baseline_reform=baseline_reform, year=2026
     )
-    senate_output_file_current_law = "household_tax_income_changes_senate_current_law_baseline.csv"
+    senate_output_file_current_law = (
+        "household_tax_income_changes_senate_current_law_baseline.csv"
+    )
     df_senate_current_law.to_csv(senate_output_file_current_law, index=False)
-    print(f"\nSaved Senate Current Law baseline results to '{senate_output_file_current_law}'")
+    print(
+        f"\nSaved Senate Current Law baseline results to '{senate_output_file_current_law}'"
+    )
     print(f"Total households analyzed (Senate): {len(df_senate_current_law):,}")
     print(f"\nFirst 5 rows of Senate Current Law baseline results:")
     print(df_senate_current_law.head())
@@ -69,7 +78,7 @@ def main():
     print("ANALYSIS 2: TCJA Baseline")
     print("=" * 50)
     tcja_baseline_reform = tcja_reform()
-    
+
     print(f"Analyzing {len(reforms)} reform components against TCJA baseline:")
     for i, reform_name in enumerate(reforms.keys(), 1):
         print(f"  {i}. {reform_name}")
@@ -113,7 +122,9 @@ def main():
     print("=" * 50)
     print(f"Generated 4 spreadsheets:")
     print(f"  1. {output_file_current_law} - House reforms vs Current Law baseline")
-    print(f"  2. {senate_output_file_current_law} - Senate reforms vs Current Law baseline")
+    print(
+        f"  2. {senate_output_file_current_law} - Senate reforms vs Current Law baseline"
+    )
     print(f"  3. {output_file_tcja} - House reforms vs TCJA baseline")
     print(f"  4. {senate_output_file_tcja} - Senate reforms vs TCJA baseline")
     print(f"\nAnalysis completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
