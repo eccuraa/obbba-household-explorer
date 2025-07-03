@@ -696,11 +696,19 @@ class VisualizationRenderer:
 
         with col1:
             self._render_household_attributes(profile, household_data)
-            self._render_weight_info(household_data)
 
         with col2:
             self._render_baseline_info(profile, household_data)
             self._render_impact_summary(household_data)
+            
+            # Add population weight in grey text
+            weight = household_data["Household Weight"]
+            st.markdown(
+                f"<p style='color: {UIConfig.colors['GRAY']}; font-size: 14px; margin-top: 10px;'>"
+                f"This household represents {math.ceil(weight):,} households in the US."
+                f"</p>", 
+                unsafe_allow_html=True
+            )
 
         # Render analysis sections
         impacts = self.analysis_engine.get_reform_impacts(household_data)
@@ -757,17 +765,13 @@ class VisualizationRenderer:
                 content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
 
         # Add marital status
-        marital_info = self._get_marital_info(profile)
+        marital_info = self._get_marital_info(profile, household_data)
         content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Marital Status:</strong> {marital_info}</p>"
 
         # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['TEAL_PRESSED'];'>
-                     <strong> 💰 Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"""
+        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 10px 0 10px 0; color: UIConfig.colors['TEAL_PRESSED'];'>
+                     <strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"""
 
-        # Add income sources
-        income_content = self._build_income_sources_content(household_data)
-        if income_content:
-            content += income_content
 
         return content
 
@@ -782,35 +786,19 @@ class VisualizationRenderer:
                     dependent_ages.append(f"{age:.0f}")
         return dependent_ages
 
-    def _get_marital_info(self, profile: HouseholdProfile) -> str:
+    def _get_marital_info(self, profile: HouseholdProfile, household_data: pd.Series) -> str:
         """Get formatted marital status information."""
         if profile.is_married and profile.age_of_spouse:
             return f"Married<br><strong>Spouse Age:</strong> {profile.age_of_spouse:.0f} years"
         else:
             return "Single"
 
-    def _build_income_sources_content(self, household_data: pd.Series) -> str:
-        """Build HTML content for income sources."""
-        income_list = []
-        for display_name, column_name in AppConfig.INCOME_SOURCES:
-            amount = household_data.get(column_name, 0)
-            if amount > 0:
-                income_list.append(f"• {display_name}: ${amount:,.0f}")
-
-        if income_list:
-            content = "<p style='color: UIConfig.colors['DARKEST_BLUE'];'><strong>Featured Income Sources:</strong></p>"
-            content += "".join(
-                f"<p style='margin-left: 10px; margin-top: 2px; color: UIConfig.colors['DARKEST_BLUE'];'>{income}</p>"
-                for income in income_list
-            )
-            return content
-        return ""
 
     def _render_household_attributes(
         self, profile: HouseholdProfile, household_data: pd.Series
     ) -> None:
         """Render household attributes in a styled container."""
-        st.subheader("🏠 Baseline Household Attributes")
+        st.subheader("Baseline Household Attributes")
 
         content = self._build_household_attributes_content(profile, household_data)
         st.markdown(
@@ -826,21 +814,13 @@ class VisualizationRenderer:
         with st.expander("Full Dataframe Row"):
             st.dataframe(household_data.to_frame().T, use_container_width=True)
 
-    def _render_weight_info(self, household_data: pd.Series) -> None:
-        """Render statistical weight information."""
-        weight = household_data["Household Weight"]
-        st.subheader("📈 Statistical Weight")
-        with st.container():
-            st.metric("Population Weight", f"{math.ceil(weight):,}")
-            st.caption(
-                "This household represents approximately this many similar households in the U.S."
-            )
+
 
     def _render_baseline_info(
         self, profile: HouseholdProfile, household_data: pd.Series
     ) -> None:
         """Render baseline tax/income information."""
-        st.subheader("🔄 Reconciliation Bill Impact Summary")
+        st.subheader("Reconciliation Bill Impact Summary")
 
         baseline_value, baseline_label = self.analysis_engine.get_baseline_info(
             profile, household_data
