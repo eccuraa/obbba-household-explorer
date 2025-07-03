@@ -702,7 +702,7 @@ class VisualizationRenderer:
 
     def __init__(
         self,
-        analysis_engine: TaxAnalysisEngine,
+        analysis_engine: Optional[TaxAnalysisEngine],
         reform_type: str = "",
         baseline: str = "",
     ):
@@ -742,79 +742,6 @@ class VisualizationRenderer:
             st.info(
                 f"The {self.reform_type} OBBB against {self.baseline.lower()} does not affect this household's {self.analysis_engine.analysis_type.value.lower()}."
             )
-
-    def _render_styled_container(self, title: str, content: str) -> None:
-        """Helper method to render consistently styled containers."""
-        st.markdown(
-            f"""
-        <div style="{UIConfig.CONTAINER_STYLE}">
-        <h4 style="color: UIConfig.colors['TEAL_PRESSED'];">{title}</h4>
-        {content}
-        </div>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    def _build_household_attributes_content(
-        self, profile: HouseholdProfile, household_data: pd.Series
-    ) -> str:
-        """Build HTML content for household attributes display."""
-        # Basic attributes
-        attributes = [
-            ("State", profile.state),
-            ("Household Size", f"{household_data['Household Size']:.0f}"),
-            ("Number of Tax Units", f"{household_data['Number of Tax Units']:.0f}"),
-            ("Head of Household Age", f"{profile.age_of_head:.0f} years"),
-            ("Number of Dependents", f"{profile.number_of_dependents:.0f}"),
-            (
-                "Number of People with SSN Card (Citizen/EAD)",
-                f"{household_data['Num with SSN Card (Citizen/EAD)']:.0f}",
-            ),
-            (
-                "Number of People with SSN Card (Other/None)",
-                f"{household_data['Num with SSN Card (Other/None)']:.0f}",
-            ),
-        ]
-
-        content = "".join(
-            f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>{label}:</strong> {value}</p>"
-            for label, value in attributes
-        )
-
-        # Add children's ages if any
-        if profile.number_of_dependents > 0:
-            dependent_ages = self._get_dependent_ages(household_data)
-            if dependent_ages:
-                content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
-
-        # Add marital status
-        marital_info = self._get_marital_info(profile, household_data)
-        content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Marital Status:</strong> {marital_info}</p>"
-
-        # Add market income with same formatting as other attributes
-        content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"
-
-        return content
-
-    def _get_dependent_ages(self, household_data: pd.Series) -> List[str]:
-        """Extract dependent ages from household data."""
-        dependent_ages = []
-        for i in range(1, AppConfig.MAX_DEPENDENTS + 1):
-            age_col = f"Age of Dependent {i}"
-            if age_col in household_data.index:
-                age = household_data[age_col]
-                if pd.notna(age) and age > 0:
-                    dependent_ages.append(f"{age:.0f}")
-        return dependent_ages
-
-    def _get_marital_info(
-        self, profile: HouseholdProfile, household_data: pd.Series
-    ) -> str:
-        """Get formatted marital status information."""
-        if profile.is_married and profile.age_of_spouse:
-            return f"Married<br><strong>Spouse Age:</strong> {profile.age_of_spouse:.0f} years"
-        else:
-            return "Single"
 
     def _render_household_attributes(
         self, profile: HouseholdProfile, household_data: pd.Series
@@ -1096,6 +1023,252 @@ class VisualizationRenderer:
             """
             )
 
+    def _render_styled_container(self, title: str, content: str) -> None:
+        """Helper method to render consistently styled containers."""
+        st.markdown(
+            f"""
+        <div style="{UIConfig.CONTAINER_STYLE}">
+        <h4 style="color: UIConfig.colors['TEAL_PRESSED'];">{title}</h4>
+        {content}
+        </div>
+        """,
+            unsafe_allow_html=True,
+        )
+
+    def _get_dependent_ages(self, household_data: pd.Series) -> List[str]:
+        """Extract dependent ages from household data."""
+        dependent_ages = []
+        for i in range(1, AppConfig.MAX_DEPENDENTS + 1):
+            age_col = f"Age of Dependent {i}"
+            if age_col in household_data.index:
+                age = household_data[age_col]
+                if pd.notna(age) and age > 0:
+                    dependent_ages.append(f"{age:.0f}")
+        return dependent_ages
+
+    def _get_marital_info(
+        self, profile: HouseholdProfile, household_data: pd.Series
+    ) -> str:
+        """Get formatted marital status information."""
+        if profile.is_married and profile.age_of_spouse:
+            return f"Married<br><strong>Spouse Age:</strong> {profile.age_of_spouse:.0f} years"
+        else:
+            return "Single"
+
+    def _render_household_attributes_redesigned(
+        self, profile: HouseholdProfile, household_data: pd.Series
+    ) -> None:
+        """Render household attributes in redesigned 2-column layout."""
+        st.subheader("Household Attributes")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # Basic demographic info
+            content1 = f"""
+            <p style='color: var(--text-color, #000000);'><strong>State:</strong> {profile.state}</p>
+            <p style='color: var(--text-color, #000000);'><strong>Household Size:</strong> {household_data['Household Size']:.0f}</p>
+            <p style='color: var(--text-color, #000000);'><strong>Number of Tax Units:</strong> {household_data['Number of Tax Units']:.0f}</p>
+            <p style='color: var(--text-color, #000000);'><strong>Head of Household Age:</strong> {profile.age_of_head:.0f} years</p>
+            """
+
+            # Add marital info
+            content1 += f"<p style='color: var(--text-color, #000000);'><strong>Marital Status:</strong> {self._get_marital_info(profile, household_data)}</p>"
+
+            st.markdown(content1, unsafe_allow_html=True)
+
+        with col2:
+            # Family and citizenship info
+            content2 = f"""
+            <p style='color: var(--text-color, #000000);'><strong>Number of Dependents:</strong> {profile.number_of_dependents:.0f}</p>
+            """
+
+            # Add children's ages if any
+            if profile.number_of_dependents > 0:
+                dependent_ages = self._get_dependent_ages(household_data)
+                if dependent_ages:
+                    content2 += f"<p style='color: var(--text-color, #000000);'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+
+            content2 += f"""
+            <p style='color: var(--text-color, #000000);'><strong>People with SSN Card (Citizen/EAD):</strong> {household_data['Num with SSN Card (Citizen/EAD)']:.0f}</p>
+            <p style='color: var(--text-color, #000000);'><strong>People with SSN Card (Other/None):</strong> {household_data['Num with SSN Card (Other/None)']:.0f}</p>
+            <p style='color: var(--text-color, #000000);'><strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>
+            """
+
+            st.markdown(content2, unsafe_allow_html=True)
+
+        # Add population weight below
+        weight = household_data["Household Weight"]
+        st.markdown(
+            f"<p style='color: {UIConfig.colors['GRAY']}; font-size: 14px; margin-top: 10px; text-align: center;'>"
+            f"This household represents {math.ceil(weight):,} households in the US."
+            f"</p>",
+            unsafe_allow_html=True,
+        )
+
+        # Raw data expander
+        with st.expander("Full Dataframe Row"):
+            st.dataframe(household_data.to_frame().T, use_container_width=True)
+
+    def _render_impact_summary_table(
+        self, profile: HouseholdProfile, household_data: pd.Series
+    ) -> None:
+        """Render the new 5x4 impact summary table."""
+        st.markdown("---")
+        st.subheader(
+            f"Financial Impact Breakdown of {self.reform_type} OBBB Against {self.baseline}"
+        )
+
+        # Prepare data for the table
+        table_data = []
+
+        # Market Income row
+        market_income_baseline = household_data["Market Income"]
+        market_income_reform = market_income_baseline  # Market income doesn't change
+        table_data.append(
+            [
+                "Market Income",
+                f"${market_income_baseline:,.0f}",
+                f"${market_income_reform:,.0f}",
+                "$0",
+                "0.0%",
+            ]
+        )
+
+        # Federal Taxes row
+        federal_tax_baseline = profile.baseline_federal_tax
+        federal_tax_change = household_data["Total Change in Federal Tax Liability"]
+        federal_tax_reform = federal_tax_baseline + federal_tax_change
+        federal_tax_pct = household_data["Percentage Change in Federal Tax Liability"]
+        table_data.append(
+            [
+                "Federal Taxes",
+                f"${federal_tax_baseline:,.0f}",
+                f"${federal_tax_reform:,.0f}",
+                f"${federal_tax_change:+,.0f}",
+                f"{federal_tax_pct:+.1f}%",
+            ]
+        )
+
+        # State Taxes row
+        state_tax_baseline = household_data.get("State Income Tax", 0)
+        state_tax_change = household_data.get("Total Change in State Tax Liability", 0)
+        state_tax_reform = state_tax_baseline + state_tax_change
+        state_tax_pct = household_data.get(
+            "Percentage Change in State Tax Liability", 0
+        )
+        table_data.append(
+            [
+                "State Taxes",
+                f"${state_tax_baseline:,.0f}",
+                f"${state_tax_reform:,.0f}",
+                f"${state_tax_change:+,.0f}",
+                f"{state_tax_pct:+.1f}%",
+            ]
+        )
+
+        # Benefits row
+        benefits_baseline = household_data["Baseline Total Benefits"]
+        benefits_change = household_data["Total Change in Benefits"]
+        benefits_reform = benefits_baseline + benefits_change
+        benefits_pct = household_data["Percentage Change in Benefits"]
+        table_data.append(
+            [
+                "Benefits",
+                f"${benefits_baseline:,.0f}",
+                f"${benefits_reform:,.0f}",
+                f"${benefits_change:+,.0f}",
+                f"{benefits_pct:+.1f}%",
+            ]
+        )
+
+        # Net Income row
+        net_income_baseline = profile.baseline_net_income
+        net_income_change = household_data["Total Change in Net Income"]
+        net_income_reform = net_income_baseline + net_income_change
+        net_income_pct = household_data["Percentage Change in Net Income"]
+        table_data.append(
+            [
+                "Net Income",
+                f"${net_income_baseline:,.0f}",
+                f"${net_income_reform:,.0f}",
+                f"${net_income_change:+,.0f}",
+                f"{net_income_pct:+.1f}%",
+            ]
+        )
+
+        # Create DataFrame for the table
+        import pandas as pd
+
+        df_table = pd.DataFrame(
+            table_data,
+            columns=[
+                "",
+                "Baseline Value",
+                "Reform Value",
+                "Absolute Change",
+                "% Change",
+            ],
+        )
+
+        # Style the table
+        def style_table(x):
+            styles = []
+            for i, row in enumerate(x.itertuples()):
+                row_styles = [""] * len(row[1:])  # Skip index
+
+                # Color positive changes in green, negative in red for absolute and % change columns
+                abs_change_val = row[4]  # Absolute Change column
+                pct_change_val = row[5]  # % Change column
+
+                if abs_change_val.startswith("+"):
+                    if i in [3, 4]:  # Benefits and Net Income rows - positive is good
+                        row_styles[3] = (
+                            f'color: {UIConfig.colors["TEAL_PRESSED"]}; font-weight: bold'
+                        )
+                        row_styles[4] = (
+                            f'color: {UIConfig.colors["TEAL_PRESSED"]}; font-weight: bold'
+                        )
+                    elif i in [
+                        1,
+                        2,
+                    ]:  # Federal and State Taxes - positive is bad (more taxes)
+                        row_styles[3] = (
+                            f'color: {UIConfig.colors["GRAY"]}; font-weight: bold'
+                        )
+                        row_styles[4] = (
+                            f'color: {UIConfig.colors["GRAY"]}; font-weight: bold'
+                        )
+                elif abs_change_val.startswith("-"):
+                    if i in [3, 4]:  # Benefits and Net Income rows - negative is bad
+                        row_styles[3] = (
+                            f'color: {UIConfig.colors["GRAY"]}; font-weight: bold'
+                        )
+                        row_styles[4] = (
+                            f'color: {UIConfig.colors["GRAY"]}; font-weight: bold'
+                        )
+                    elif i in [
+                        1,
+                        2,
+                    ]:  # Federal and State Taxes - negative is good (less taxes)
+                        row_styles[3] = (
+                            f'color: {UIConfig.colors["TEAL_PRESSED"]}; font-weight: bold'
+                        )
+                        row_styles[4] = (
+                            f'color: {UIConfig.colors["TEAL_PRESSED"]}; font-weight: bold'
+                        )
+
+                styles.append(row_styles)
+
+            return pd.DataFrame(styles, index=x.index, columns=x.columns)
+
+        # Display the styled table
+        st.dataframe(
+            df_table.style.apply(style_table, axis=None),
+            use_container_width=True,
+            hide_index=True,
+        )
+
 
 class HouseholdDashboard:
     """Main dashboard application orchestrator."""
@@ -1240,20 +1413,39 @@ class HouseholdDashboard:
             household_data = self._get_household_data(df_filtered, household_id)
             profile = HouseholdProfile.from_series(household_data)
 
-            # Set up analysis
-            analysis_type = self._render_analysis_type_selector(household_data)
-            analysis_engine = TaxAnalysisEngine(analysis_type)
+            # Change URL to include this household ID
+            st.query_params.update({"ID": household_id})
 
-            # Change URL to include this household ID and analysis type
-            st.query_params.update({"ID": household_id, ",": analysis_type})
-
-            # Render main content
+            # Render main content in new layout
             renderer = VisualizationRenderer(
-                analysis_engine, self.reform_type, self.baseline
+                None,
+                self.reform_type,
+                self.baseline,  # Analysis engine will be set later
             )
-            renderer.render_main_content(profile, household_data)
 
-            # Add analysis info card
+            # Render household attributes in 2 columns
+            renderer._render_household_attributes_redesigned(profile, household_data)
+
+            # Render the new impact summary table
+            renderer._render_impact_summary_table(profile, household_data)
+
+            # Analysis type selector (moved from sidebar to main content)
+            analysis_type = self._render_analysis_type_selector_main(household_data)
+
+            # Set up analysis engine now that we have the analysis type
+            analysis_engine = TaxAnalysisEngine(analysis_type)
+            renderer.analysis_engine = analysis_engine
+
+            # Render waterfall chart
+            impacts = analysis_engine.get_reform_impacts(household_data)
+            if impacts:
+                renderer._render_waterfall_chart(impacts, household_data)
+            else:
+                st.info(
+                    f"The {self.reform_type} OBBB against {self.baseline.lower()} does not affect this household's {analysis_type.value.lower()}."
+                )
+
+            # Add analysis info card (collapsible)
             renderer.render_analysis_info_card()
 
         except Exception as e:
@@ -1262,16 +1454,17 @@ class HouseholdDashboard:
 
     def _render_header(self) -> None:
         """Render dashboard header and title."""
-        st.title("Reconciliation Bill - Household Impact Dashboard")
+        st.title("OBBBA Household Explorer")
         st.markdown(
-            f"*Exploring {self.reform_type} reforms vs {self.baseline} baseline - How the reconciliation bill affects individual American households*"
+            f"*Explore how the reconciliation bill affects individual households across America*"
         )
         st.sidebar.header("Select Household")
 
-    def _render_analysis_type_selector(self, household_data: pd.Series) -> AnalysisType:
-        """Render analysis type selector in sidebar with percent changes."""
-        st.sidebar.markdown("---")
-        st.sidebar.subheader("Analysis Type")
+    def _render_analysis_type_selector_main(
+        self, household_data: pd.Series
+    ) -> AnalysisType:
+        """Render analysis type selector in main content with percent changes."""
+        st.markdown("---")
 
         type_mapping = {
             analysis_type.value: analysis_type for analysis_type in AnalysisType
@@ -1280,16 +1473,14 @@ class HouseholdDashboard:
         options = []
         for display_value, enum_type in type_mapping.items():
             # Create temporary analysis engine for this type
-            temp_engine = TaxAnalysisEngine(
-                enum_type
-            )  # <-- Creating a temporary engine
-            _, pct, *_ = temp_engine.get_change_info(
-                household_data
-            )  # <-- Using the temp engine
+            temp_engine = TaxAnalysisEngine(enum_type)
+            _, pct, *_ = temp_engine.get_change_info(household_data)
             label = f"{display_value} ({pct:+.1f}%)"
             options.append(label)
 
-        selected = st.sidebar.radio("Select what to analyze:", options, index=0)
+        selected = st.radio(
+            "Select Impact Breakdown:", options, index=0, horizontal=True
+        )
         selected_type = type_mapping[selected.split(" (")[0]]
         st.session_state.analysis_type = selected_type
         return selected_type
