@@ -104,12 +104,20 @@ class UIConfig:
     colors = {
         "BLACK": "#000000",
         "BLUE_98": "#F7FAFD",
-        "DARKEST_BLUE": "#0C1A27",
-        "GREEN": "#29d40f",
         "BLUE": "#2C6496",
-        "DARK_RED": "#b50d0d",
-        "MEDIUM_LIGHT_GRAY": "#BDBDBD",
+        "BLUE_LIGHT": "#D8E6F3",
+        "BLUE_PRESSED": "#17354F",
+        "DARK_BLUE_HOVER": "#1d3e5e",
         "DARK_GRAY": "#616161",
+        "DARK_RED": "#b50d0d",
+        "DARKEST_BLUE": "#0C1A27",
+        "GRAY": "#808080",
+        "LIGHT_GRAY": "#F2F2F2",
+        "MEDIUM_DARK_GRAY": "#D2D2D2",
+        "MEDIUM_LIGHT_GRAY": "#BDBDBD",
+        "TEAL_ACCENT": "#39C6C0",
+        "TEAL_LIGHT": "#F7FDFC",
+        "TEAL_PRESSED": "#227773",
         "WHITE": "#FFFFFF",
     }
 
@@ -635,15 +643,15 @@ class TaxAnalysisEngine:
         # Determine color based on analysis type and value
         if self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
             color = (
-                UIConfig.colors["GREEN"]
+                UIConfig.colors["DARKEST_BLUE"]
                 if change_value > 0
-                else UIConfig.colors["DARK_RED"]
+                else UIConfig.colors["TEAL_ACCENT"]
             )
         else:
             color = (
-                UIConfig.colors["DARK_RED"]
+                UIConfig.colors["TEAL_ACCENT"]
                 if change_value > 0
-                else UIConfig.colors["GREEN"]
+                else UIConfig.colors["DARKEST_BLUE"]
             )
 
         return change_value, pct_change, change_label, final_label, color, final_value
@@ -696,7 +704,7 @@ class VisualizationRenderer:
         st.markdown(
             f"""
         <div style="{UIConfig.CONTAINER_STYLE}">
-        <h4 style="color: UIConfig.colors['DARKEST_BLUE'];">{title}</h4>
+        <h4 style="color: UIConfig.colors['TEAL_ACCENT'];">{title}</h4>
         {content}
         </div>
         """,
@@ -725,7 +733,7 @@ class VisualizationRenderer:
         ]
 
         content = "".join(
-            f"<p style='color: UIConfig.colors['DARKEST_BLUE'];><strong>{label}:</strong> {value}</p>"
+            f"<p style='color: UIConfig.colors['TEAL_ACCENT'];><strong>{label}:</strong> {value}</p>"
             for label, value in attributes
         )
 
@@ -733,14 +741,14 @@ class VisualizationRenderer:
         if profile.number_of_dependents > 0:
             dependent_ages = self._get_dependent_ages(household_data)
             if dependent_ages:
-                content += f"<p style='color: UIConfig.colors['DARKEST_BLUE'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+                content += f"<p style='color: UIConfig.colors['TEAL_ACCENT'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
 
         # Add marital status
         marital_info = self._get_marital_info(profile)
-        content += f"<p style='color: UIConfig.colors['DARKEST_BLUE'];'><strong>Marital Status:</strong> {marital_info}</p>"
+        content += f"<p style='color: UIConfig.colors['TEAL_ACCENT'];'><strong>Marital Status:</strong> {marital_info}</p>"
 
         # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['DARKEST_BLUE'];'>
+        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['TEAL_ACCENT'];'>
                      <strong> 💰 Gross Income:</strong> ${household_data['Gross Income']:,.0f}</p>"""
 
         # Add income sources
@@ -839,7 +847,7 @@ class VisualizationRenderer:
                 profile, household_data
             )
 
-        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: UIConfig.colors['DARKEST_BLUE'];'>{baseline_label}: ${baseline_value:,.0f}</p>"
+        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: UIConfig.colors['TEAL_ACCENT'];'>{baseline_label}: ${baseline_value:,.0f}</p>"
         content += additional_content
 
         self._render_styled_container("Baseline Values", content)
@@ -866,7 +874,7 @@ class VisualizationRenderer:
 
         if benefit_components:
             return "".join(
-                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['DARKEST_BLUE'];'>{component}</p>"
+                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'>{component}</p>"
                 for component in benefit_components
             )
         return ""
@@ -907,9 +915,9 @@ class VisualizationRenderer:
         ]
 
         if additional_taxes:
-            content = "<p style='margin: 10px 0 0 0; color: UIConfig.colors['DARKEST_BLUE'];'><strong>Additional Information:</strong></p>"
+            content = "<p style='margin: 10px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'><strong>Additional Information:</strong></p>"
             content += "".join(
-                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['DARKEST_BLUE'];'>• {tax}</p>"
+                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'>• {tax}</p>"
                 for tax in additional_taxes
             )
             return content
@@ -921,11 +929,17 @@ class VisualizationRenderer:
             self.analysis_engine.get_change_info(household_data)
         )
 
+        # Override color for positive changes to use TEAL_ACCENT
+        if change_value > 0:
+            impact_color = UIConfig.colors["TEAL_ACCENT"]
+        else:
+            impact_color = UIConfig.colors["DARKEST_BLUE"]
+
         content = f"""
-        <p style="color: {color}; font-size: 18px; font-weight: bold;">
+        <p style="color: {impact_color}; font-size: 18px; font-weight: bold;">
         {change_label}: ${change_value:,.0f} ({pct_change:+.1f}%)
         </p>
-        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: UIConfig.colors['DARKEST_BLUE'];">
+        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: UIConfig.colors['TEAL_ACCENT'];">
         {final_label}: ${final_value:,.0f}
         </p>
         """
@@ -953,22 +967,22 @@ class VisualizationRenderer:
                         else "Income Change"
                     )
                     color = (
-                        "UIConfig.colors['GREEN']"
+                        "UIConfig.colors['TEAL_ACCENT']"
                         if impact.total_change > 0
-                        else "UIConfig.colors['DARK_RED']"
+                        else "UIConfig.colors['TEAL_ACCENT']"
                     )
                 else:
                     label = "Tax Change"
                     color = (
-                        "UIConfig.colors['GREEN']"
+                        "UIConfig.colors['TEAL_ACCENT']"
                         if impact.total_change < 0
-                        else "UIConfig.colors['DARK_RED']"
+                        else "UIConfig.colors['TEAL_ACCENT']"
                     )
 
                 st.markdown(
                     f"""
                 <div style="padding: 8px; border-radius: 5px; background-color: UIConfig.colors['BLUE_98']; border: 1px solid UIConfig.colors['MEDIUM_LIGHT_GRAY']; margin: 5px 0;">
-                <h5 style="color: UIConfig.colors['DARKEST_BLUE']; margin: 0 0 8px 0;">{impact.name}</h5>
+                <h5 style="color: UIConfig.colors['TEAL_ACCENT']; margin: 0 0 8px 0;">{impact.name}</h5>
                 <p style="color: {color}; font-weight: bold; margin: 0;">
                 {label}: ${impact.total_change:,.0f}
                 </p>
@@ -1033,12 +1047,12 @@ class VisualizationRenderer:
             AnalysisType.NET_INCOME,
             AnalysisType.BENEFITS,
         ]:
-            # For net income: increases are good (green), decreases are bad (red)
-            increasing_color = UIConfig.colors["GREEN"]
-            decreasing_color = UIConfig.colors["DARK_RED"]
+            # For net income: increases are good (blue), decreases are bad (light grey)
+            increasing_color = UIConfig.colors["DARKEST_BLUE"]
+            decreasing_color = UIConfig.colors["TEAL_ACCENT"]
         else:
-            increasing_color = UIConfig.colors["DARK_RED"]
-            decreasing_color = UIConfig.colors["GREEN"]
+            increasing_color = UIConfig.colors["TEAL_ACCENT"]
+            decreasing_color = UIConfig.colors["DARKEST_BLUE"]
 
         fig.add_trace(
             go.Waterfall(
@@ -1051,7 +1065,7 @@ class VisualizationRenderer:
                 y=[item[1] for item in waterfall_data],
                 text=[f"${item[1]:,.0f}" for item in waterfall_data],
                 textposition="outside",
-                connector={"line": {"color": UIConfig.colors["DARK_GRAY"]}},
+                connector={"line": {"color": UIConfig.colors["MEDIUM_LIGHT_GRAY"]}},
                 increasing={"marker": {"color": increasing_color}},
                 decreasing={"marker": {"color": decreasing_color}},
                 totals={"marker": {"color": UIConfig.colors["BLUE"]}},
@@ -1207,6 +1221,19 @@ class HouseholdDashboard:
         st.set_page_config(
             page_title="Reconciliation Bill Impact Dashboard", layout="wide"
         )
+        
+        # Add custom CSS for radio button styling
+        st.markdown("""
+        <style>
+        .stRadio > div[role="radiogroup"] > label > div:first-child, .stCheckbox > div > label > div:first-child {
+            background-color: #3378b2 !important;
+        }
+        .stRadio > div[role="radiogroup"] > label > div:first-child > div, .stCheckbox > div > label > div:first-child > div {
+            border: 1px solid #3378b2 !important;
+            background-color: white !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
     def run(self) -> None:
         """
