@@ -18,9 +18,19 @@ import os
 from policyengine_core.charts import format_fig as format_fig_
 
 def format_fig(fig):
-    return format_fig_(fig).update_layout(
-        margin_r=100,
+    # Apply the original formatting
+    formatted_fig = format_fig_(fig).update_layout(
+        margin_r=120,
     )
+    
+    # Make the logo smaller by reducing its size
+    if hasattr(formatted_fig, 'layout') and hasattr(formatted_fig.layout, 'images'):
+        for image in formatted_fig.layout.images:
+            # Reduce logo size from 0.15 to 0.1 (about 33% smaller)
+            image.sizex = 0.1
+            image.sizey = 0.1
+    
+    return formatted_fig
 
 
 # Configure logging
@@ -1068,6 +1078,7 @@ class VisualizationRenderer:
             y=[item[1] for item in waterfall_data],
             text=[f"${item[1]:,.0f}" for item in waterfall_data],
             textposition="outside",
+            textfont={"color": UIConfig.colors['GRAY']},
             connector={"line": {"color": UIConfig.colors['DARKEST_BLUE']}},
             increasing={"marker": {"color": increasing_color}},
             decreasing={"marker": {"color": decreasing_color}},
