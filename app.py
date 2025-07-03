@@ -644,9 +644,9 @@ class TaxAnalysisEngine:
         if abs(change_value) < 1:
             color = UIConfig.colors['BLACK']
         elif self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
-            color = UIConfig.colors['TEAL_ACCENT'] if change_value > 0 else UIConfig.colors['GRAY']
+            color = UIConfig.colors['TEAL_PRESSED'] if change_value > 0 else UIConfig.colors['GRAY']
         else:
-            color = UIConfig.colors['GRAY'] if change_value > 0 else UIConfig.colors['TEAL_ACCENT']
+            color = UIConfig.colors['GRAY'] if change_value > 0 else UIConfig.colors['TEAL_PRESSED']
             
         return change_value, pct_change, change_label, final_label, color, final_value
 
@@ -690,7 +690,7 @@ class VisualizationRenderer:
             self._render_waterfall_chart(impacts, household_data)
         else:
             st.info(
-                "This household is not significantly affected by any specific reform components."
+                "This household is not affected by this reform."
             )
 
     def _render_styled_container(self, title: str, content: str) -> None:
@@ -698,7 +698,7 @@ class VisualizationRenderer:
         st.markdown(
             f"""
         <div style="{UIConfig.CONTAINER_STYLE}">
-        <h4 style="color: UIConfig.colors['TEAL_ACCENT'];">{title}</h4>
+        <h4 style="color: UIConfig.colors['TEAL_PRESSED'];">{title}</h4>
         {content}
         </div>
         """,
@@ -727,7 +727,7 @@ class VisualizationRenderer:
         ]
 
         content = "".join(
-            f"<p style='color: UIConfig.colors['TEAL_ACCENT'];><strong>{label}:</strong> {value}</p>"
+            f"<p style='color: UIConfig.colors['TEAL_PRESSED'];><strong>{label}:</strong> {value}</p>"
             for label, value in attributes
         )
 
@@ -735,14 +735,14 @@ class VisualizationRenderer:
         if profile.number_of_dependents > 0:
             dependent_ages = self._get_dependent_ages(household_data)
             if dependent_ages:
-                content += f"<p style='color: UIConfig.colors['TEAL_ACCENT'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
+                content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Children's Ages:</strong> {', '.join(dependent_ages)} years</p>"
 
         # Add marital status
         marital_info = self._get_marital_info(profile)
-        content += f"<p style='color: UIConfig.colors['TEAL_ACCENT'];'><strong>Marital Status:</strong> {marital_info}</p>"
+        content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Marital Status:</strong> {marital_info}</p>"
 
         # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['TEAL_ACCENT'];'>
+        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['TEAL_PRESSED'];'>
                      <strong> 💰 Gross Income:</strong> ${household_data['Gross Income']:,.0f}</p>"""
 
         # Add income sources
@@ -841,7 +841,7 @@ class VisualizationRenderer:
                 profile, household_data
             )
 
-        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: UIConfig.colors['TEAL_ACCENT'];'>{baseline_label}: ${baseline_value:,.0f}</p>"
+        content = f"<p style='font-size: 18px; font-weight: bold; margin: 0; color: UIConfig.colors['TEAL_PRESSED'];'>{baseline_label}: ${baseline_value:,.0f}</p>"
         content += additional_content
 
         self._render_styled_container("Baseline Values", content)
@@ -868,7 +868,7 @@ class VisualizationRenderer:
 
         if benefit_components:
             return "".join(
-                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'>{component}</p>"
+                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_PRESSED'];'>{component}</p>"
                 for component in benefit_components
             )
         return ""
@@ -909,9 +909,9 @@ class VisualizationRenderer:
         ]
 
         if additional_taxes:
-            content = "<p style='margin: 10px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'><strong>Additional Information:</strong></p>"
+            content = "<p style='margin: 10px 0 0 0; color: UIConfig.colors['TEAL_PRESSED'];'><strong>Additional Information:</strong></p>"
             content += "".join(
-                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_ACCENT'];'>• {tax}</p>"
+                f"<p style='margin: 2px 0 0 0; color: UIConfig.colors['TEAL_PRESSED'];'>• {tax}</p>"
                 for tax in additional_taxes
             )
             return content
@@ -925,7 +925,7 @@ class VisualizationRenderer:
 
         # Override color for positive changes to use TEAL_ACCENT
         if change_value > 0:
-            impact_color = UIConfig.colors["TEAL_ACCENT"]
+            impact_color = UIConfig.colors["TEAL_PRESSED"]
         else:
             impact_color = UIConfig.colors["DARKEST_BLUE"]
 
@@ -933,7 +933,7 @@ class VisualizationRenderer:
         <p style="color: {impact_color}; font-size: 18px; font-weight: bold;">
         {change_label}: ${change_value:,.0f} ({pct_change:+.1f}%)
         </p>
-        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: UIConfig.colors['TEAL_ACCENT'];">
+        <p style="font-size: 18px; font-weight: bold; margin-top: 10px; color: UIConfig.colors['TEAL_PRESSED'];">
         {final_label}: ${final_value:,.0f}
         </p>
         """
@@ -963,14 +963,14 @@ class VisualizationRenderer:
                         else "Income Change"
                     )
                     color = (
-                        "UIConfig.colors['TEAL_ACCENT']"
+                        "UIConfig.colors['TEAL_PRESSED']"
                         if impact.total_change > 0
                         else "UIConfig.colors['GRAY']"
                     )
                 else:
                     label = "Tax Change"
                     color = (
-                        "UIConfig.colors['TEAL_ACCENT']"
+                        "UIConfig.colors['TEAL_PRESSED']"
                         if impact.total_change < 0
                         else "UIConfig.colors['GRAY']"
                     )
@@ -978,7 +978,7 @@ class VisualizationRenderer:
                 st.markdown(
                     f"""
                 <div style="padding: 8px; border-radius: 5px; background-color: UIConfig.colors['BLUE_98']; border: 1px solid UIConfig.colors['MEDIUM_LIGHT_GRAY']; margin: 5px 0;">
-                <h5 style="color: UIConfig.colors['TEAL_ACCENT']; margin: 0 0 8px 0;">{impact.name}</h5>
+                <h5 style="color: UIConfig.colors['TEAL_PRESSED']; margin: 0 0 8px 0;">{impact.name}</h5>
                 <p style="color: {color}; font-weight: bold; margin: 0;">
                 {label}: ${impact.total_change:,.0f}
                 </p>
@@ -1044,11 +1044,11 @@ class VisualizationRenderer:
             AnalysisType.BENEFITS,
         ]:
             # For net income: increases are good (teal), decreases are bad (dark gray)
-            increasing_color = UIConfig.colors['TEAL_ACCENT']
+            increasing_color = UIConfig.colors['TEAL_PRESSED']
             decreasing_color = UIConfig.colors['GRAY']
         else:
             increasing_color = UIConfig.colors['GRAY']
-            decreasing_color = UIConfig.colors['TEAL_ACCENT']
+            decreasing_color = UIConfig.colors['TEAL_PRESSED']
         
         fig.add_trace(go.Waterfall(
             name=f"{chart_title} Impact",
@@ -1108,13 +1108,14 @@ class VisualizationRenderer:
         income_names = [display_name for display_name, _ in income_sources]
         income_list = ", ".join(income_names[:-1]) + f", and {income_names[-1]}"
 
-        st.info(
-            f"""
-        📋 **Analysis Scope:** We are currently analyzing the effects of {reforms_text} on {analysis_focus}. \n
-        Currently, we are only displaying the {income_list} as featured income sources, with Employment Income including Tip and Overtime Income. 
-        This is why these selected income sources will often not add up to the Gross Income total.
-        """
-        )
+        with st.expander("Analysis Scope", expanded=False):
+            st.info(
+                f"""
+            We are currently analyzing the effects of {reforms_text} on {analysis_focus}. \n
+            Currently, we are only displaying the {income_list} as featured income sources, with Employment Income including Tip and Overtime Income. 
+            This is why these selected income sources will often not add up to the Gross Income total.
+            """
+            )
 
 
 class HouseholdDashboard:
