@@ -754,7 +754,7 @@ class VisualizationRenderer:
         ]
 
         content = "".join(
-            f"<p style='color: UIConfig.colors['TEAL_PRESSED'];><strong>{label}:</strong> {value}</p>"
+            f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>{label}:</strong> {value}</p>"
             for label, value in attributes
         )
 
@@ -768,9 +768,8 @@ class VisualizationRenderer:
         marital_info = self._get_marital_info(profile, household_data)
         content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Marital Status:</strong> {marital_info}</p>"
 
-        # Add prominent net income display
-        content += f"""<p style='font-size: 20px; font-weight: bold; margin: 10px 0 10px 0; color: UIConfig.colors['TEAL_PRESSED'];'>
-                     <strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"""
+        # Add market income with same formatting as other attributes
+        content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"
 
 
         return content
