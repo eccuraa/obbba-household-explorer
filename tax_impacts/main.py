@@ -32,19 +32,19 @@ def main():
     print()
 
     # Calculate household-level impacts with Current Law baseline
-    # df_current_law = calculate_stacked_household_impacts(
-    #     reforms=reforms, baseline_reform=baseline_reform, year=2026
-    # )
+    df_current_law = calculate_stacked_household_impacts(
+        reforms=reforms, baseline_reform=baseline_reform, year=2026
+    )
 
-    # # Save Current Law baseline results
-    # output_file_current_law = "household_tax_income_changes_current_law_baseline.csv"
-    # df_current_law.to_csv(output_file_current_law, index=False)
-    # print(f"\nSaved Current Law baseline results to '{output_file_current_law}'")
-    # print(f"Total households analyzed: {len(df_current_law):,}")
+    # Save Current Law baseline results
+    output_file_current_law = "household_tax_income_changes_current_law_baseline.csv"
+    df_current_law.to_csv(output_file_current_law, index=False)
+    print(f"\nSaved Current Law baseline results to '{output_file_current_law}'")
+    print(f"Total households analyzed: {len(df_current_law):,}")
 
-    # # Display sample results
-    # print(f"\nFirst 5 rows of Current Law baseline results:")
-    # print(df_current_law.head())
+    # Display sample results
+    print(f"\nFirst 5 rows of Current Law baseline results:")
+    print(df_current_law.head())
 
     # Senate Finance analysis with Current Law baseline
     print("\n" + "=" * 40)
