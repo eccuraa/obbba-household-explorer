@@ -1184,10 +1184,9 @@ class HouseholdDashboard:
             border-color: #3378b2 !important;
         }
         
-        /* Selectbox option hover */
-        .stSelectbox > div > div > div > div:hover {
-            background-color: #3378b2 !important;
-            color: white !important;
+        /* Selectbox option hover - only change text color, not background */
+        .stSelectbox > div > div > div > div:hover > div {
+            color: #3378b2 !important;
         }
         
         /* Number input hover */
