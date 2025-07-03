@@ -15,6 +15,13 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 import os
+from policyengine_core.charts import format_fig as format_fig_
+
+def format_fig(fig):
+    return format_fig_(fig).update_layout(
+        margin_r=100,
+    )
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1020,6 +1027,7 @@ class VisualizationRenderer:
             fig = self._create_waterfall_figure(
                 waterfall_data, chart_title, baseline_value, final_value
             )
+            fig = format_fig(fig)
             st.plotly_chart(fig, use_container_width=True)
 
         except Exception as e:
