@@ -797,7 +797,7 @@ class VisualizationRenderer:
         self, profile: HouseholdProfile, household_data: pd.Series
     ) -> None:
         """Render household attributes in a styled container."""
-        st.subheader("Baseline Household Attributes")
+        st.subheader("Household Attributes")
 
         content = self._build_household_attributes_content(profile, household_data)
         st.markdown(
@@ -809,6 +809,9 @@ class VisualizationRenderer:
             unsafe_allow_html=True,
         )
 
+        # Add some space before the expander
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         # Raw data expander outside the styled container
         with st.expander("Full Dataframe Row"):
             st.dataframe(household_data.to_frame().T, use_container_width=True)
@@ -876,27 +879,23 @@ class VisualizationRenderer:
     ) -> str:
         """Build content for additional taxes section."""
         state_tax = household_data.get("State Income Tax", 0)
-        property_tax = household_data.get("Property Taxes", 0)
 
         # Define additional taxes based on analysis type
         tax_mappings = {
             AnalysisType.FEDERAL_TAXES: [
                 f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
-                f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None,
             ],
             AnalysisType.STATE_TAXES: [
                 f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
-                f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None,
             ],
             AnalysisType.NET_INCOME: [
                 f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
                 f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
-                f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None,
+                f"Benefits: ${household_data['Baseline Benefits']:,.0f}"
             ],
             AnalysisType.BENEFITS: [
                 f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
                 f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
-                f"Property Taxes: ${property_tax:,.0f}" if property_tax > 0 else None,
             ],
         }
 
