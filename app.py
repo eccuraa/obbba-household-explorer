@@ -41,9 +41,10 @@ logger = logging.getLogger(__name__)
 class AnalysisType(Enum):
     """Supported analysis focus types for the dashboard."""
 
+    NET_INCOME = "Net Income"
     FEDERAL_TAXES = "Federal Taxes"
     STATE_TAXES = "State Taxes"
-    NET_INCOME = "Net Income"
+    
     BENEFITS = "Benefits"
 
 
@@ -681,9 +682,11 @@ class TaxAnalysisEngine:
 class VisualizationRenderer:
     """Handles all UI rendering operations with consistent styling."""
 
-    def __init__(self, analysis_engine: TaxAnalysisEngine):
+    def __init__(self, analysis_engine: TaxAnalysisEngine, reform_type: str = "", baseline: str = ""):
         """Initialize with analysis engine."""
         self.analysis_engine = analysis_engine
+        self.reform_type = reform_type
+        self.baseline = baseline
 
     def render_main_content(
         self, profile: HouseholdProfile, household_data: pd.Series
@@ -701,13 +704,12 @@ class VisualizationRenderer:
 
         # Render analysis sections
         impacts = self.analysis_engine.get_reform_impacts(household_data)
-        self._render_reform_breakdown(impacts)
 
         if impacts:
             self._render_waterfall_chart(impacts, household_data)
         else:
             st.info(
-                "This household is not affected by this reform."
+                f"The {self.reform_type} OBBB against {self.baseline.lower()} does not affect this household's {self.analysis_engine.analysis_type.value.lower()}."
             )
 
     def _render_styled_container(self, title: str, content: str) -> None:
@@ -760,7 +762,7 @@ class VisualizationRenderer:
 
         # Add prominent net income display
         content += f"""<p style='font-size: 20px; font-weight: bold; margin: 15px 0 10px 0; color: UIConfig.colors['TEAL_PRESSED'];'>
-                     <strong> 💰 Gross Income:</strong> ${household_data['Gross Income']:,.0f}</p>"""
+                     <strong> 💰 Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"""
 
         # Add income sources
         income_content = self._build_income_sources_content(household_data)
@@ -957,59 +959,11 @@ class VisualizationRenderer:
 
         self._render_styled_container("Overall Impact", content)
 
-    def _render_reform_breakdown(self, impacts: List[ReformImpact]) -> None:
-        """Render detailed reform component breakdown."""
-        st.subheader("🔍 Detailed Reform Component Analysis")
-
-        if not impacts:
-            return
-
-        cols = st.columns(min(3, len(impacts)))
-        for i, impact in enumerate(impacts):
-            with cols[i % 3]:
-                # Determine label and color based on analysis type
-                if abs(impact.total_change) < 1:
-                    color = "UIConfig.colors['BLACK']"
-                elif self.analysis_engine.analysis_type in [
-                    AnalysisType.NET_INCOME,
-                    AnalysisType.BENEFITS,
-                ]:
-                    label = (
-                        "Change"
-                        if self.analysis_engine.analysis_type == AnalysisType.BENEFITS
-                        else "Income Change"
-                    )
-                    color = (
-                        "UIConfig.colors['TEAL_PRESSED']"
-                        if impact.total_change > 0
-                        else "UIConfig.colors['GRAY']"
-                    )
-                else:
-                    label = "Tax Change"
-                    color = (
-                        "UIConfig.colors['TEAL_PRESSED']"
-                        if impact.total_change < 0
-                        else "UIConfig.colors['GRAY']"
-                    )
-
-                st.markdown(
-                    f"""
-                <div style="padding: 8px; border-radius: 5px; background-color: UIConfig.colors['BLUE_98']; border: 1px solid UIConfig.colors['MEDIUM_LIGHT_GRAY']; margin: 5px 0;">
-                <h5 style="color: UIConfig.colors['TEAL_PRESSED']; margin: 0 0 8px 0;">{impact.name}</h5>
-                <p style="color: {color}; font-weight: bold; margin: 0;">
-                {label}: ${impact.total_change:,.0f}
-                </p>
-                </div>
-                """,
-                    unsafe_allow_html=True,
-                )
-
     def _render_waterfall_chart(
         self, impacts: List[ReformImpact], household_data: pd.Series
     ) -> None:
         """Render waterfall chart showing reform impacts."""
         chart_title = self.analysis_engine.get_chart_title()
-        st.subheader(f"📊 {chart_title} Impact Waterfall Chart")
 
         try:
             baseline_value, _ = self.analysis_engine.get_baseline_info(
@@ -1085,9 +1039,17 @@ class VisualizationRenderer:
             totals={"marker": {"color": UIConfig.colors['BLUE_PRESSED']}},
         ))
         
+        # Create chart title with reform type and baseline
+        if self.reform_type and self.baseline:
+            chart_title_text = f"Impact of {self.reform_type} OBBB Against {self.baseline} by Provision on {self.analysis_engine.analysis_type.value}"
+        else:
+            chart_title_text = f"{chart_title} Changes"
+        
         fig.update_layout(
-            title=f"{chart_title} Changes: ${baseline_value:,.0f} → ${final_value:,.0f}",
-            xaxis_title="Reform Components",
+            title={
+                "text": chart_title_text,
+                "font": {"size": 30}
+            },
             yaxis_title=f"{chart_title} ($)",
             showlegend=False,
             height=AppConfig.CHART_HEIGHT,
@@ -1283,7 +1245,7 @@ class HouseholdDashboard:
             st.query_params.update({"ID": household_id, ",": analysis_type})
 
             # Render main content
-            renderer = VisualizationRenderer(analysis_engine)
+            renderer = VisualizationRenderer(analysis_engine, self.reform_type, self.baseline)
             renderer.render_main_content(profile, household_data)
 
             # Add analysis info card
