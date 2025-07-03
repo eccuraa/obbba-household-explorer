@@ -94,13 +94,20 @@ class UIConfig:
     colors = {
         "BLACK": "#000000",
         "BLUE_98": "#F7FAFD",
-        "DARKEST_BLUE": "#0C1A27",
         "BLUE": "#2C6496",
-        "DARK_RED": "#b50d0d",
+        "BLUE_LIGHT": "#D8E6F3",
         "BLUE_PRESSED": "#17354F",
-        "MEDIUM_LIGHT_GRAY": "#BDBDBD",
+        "DARK_BLUE_HOVER": "#1d3e5e",
         "DARK_GRAY": "#616161",
+        "DARK_RED": "#b50d0d",
+        "DARKEST_BLUE": "#0C1A27",
         "GRAY": "#808080",
+        "LIGHT_GRAY": "#F2F2F2",
+        "MEDIUM_DARK_GRAY": "#D2D2D2",
+        "MEDIUM_LIGHT_GRAY": "#BDBDBD",
+        "TEAL_ACCENT": "#39C6C0",
+        "TEAL_LIGHT": "#F7FDFC",
+        "TEAL_PRESSED": "#227773",
         "WHITE": "#FFFFFF",
     }
 
@@ -624,10 +631,12 @@ class TaxAnalysisEngine:
         final_value = baseline_value + change_value
 
         # Determine color based on analysis type and value
-        if self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
-            color = UIConfig.colors['BLUE'] if change_value > 0 else UIConfig.colors['GRAY']
+        if abs(change_value) < 1:
+            color = UIConfig.colors['BLACK']
+        elif self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
+            color = UIConfig.colors['TEAL_ACCENT'] if change_value > 0 else UIConfig.colors['GRAY']
         else:
-            color = UIConfig.colors['GRAY'] if change_value > 0 else UIConfig.colors['BLUE']
+            color = UIConfig.colors['GRAY'] if change_value > 0 else UIConfig.colors['TEAL_ACCENT']
             
         return change_value, pct_change, change_label, final_label, color, final_value
 
@@ -926,7 +935,9 @@ class VisualizationRenderer:
         for i, impact in enumerate(impacts):
             with cols[i % 3]:
                 # Determine label and color based on analysis type
-                if self.analysis_engine.analysis_type in [
+                if abs(impact.total_change) < 1:
+                    color = "UIConfig.colors['BLACK']"
+                elif self.analysis_engine.analysis_type in [
                     AnalysisType.NET_INCOME,
                     AnalysisType.BENEFITS,
                 ]:
@@ -936,14 +947,14 @@ class VisualizationRenderer:
                         else "Income Change"
                     )
                     color = (
-                        "UIConfig.colors['BLUE']"
+                        "UIConfig.colors['TEAL_ACCENT']"
                         if impact.total_change > 0
                         else "UIConfig.colors['GRAY']"
                     )
                 else:
                     label = "Tax Change"
                     color = (
-                        "UIConfig.colors['BLUE']"
+                        "UIConfig.colors['TEAL_ACCENT']"
                         if impact.total_change < 0
                         else "UIConfig.colors['GRAY']"
                     )
@@ -1016,12 +1027,12 @@ class VisualizationRenderer:
             AnalysisType.NET_INCOME, 
             AnalysisType.BENEFITS,
         ]:
-            # For net income: increases are good (blue), decreases are bad (dark gray)
-            increasing_color = UIConfig.colors['BLUE']
+            # For net income: increases are good (teal), decreases are bad (dark gray)
+            increasing_color = UIConfig.colors['TEAL_ACCENT']
             decreasing_color = UIConfig.colors['GRAY']
         else:
             increasing_color = UIConfig.colors['GRAY']
-            decreasing_color = UIConfig.colors['BLUE']
+            decreasing_color = UIConfig.colors['TEAL_ACCENT']
         
         fig.add_trace(go.Waterfall(
             name=f"{chart_title} Impact",
@@ -1036,7 +1047,7 @@ class VisualizationRenderer:
             connector={"line": {"color": UIConfig.colors['DARKEST_BLUE']}},
             increasing={"marker": {"color": increasing_color}},
             decreasing={"marker": {"color": decreasing_color}},
-            totals={"marker": {"color": UIConfig.colors['DARKEST_BLUE']}},
+            totals={"marker": {"color": UIConfig.colors['BLUE_PRESSED']}},
         ))
         
         fig.update_layout(
