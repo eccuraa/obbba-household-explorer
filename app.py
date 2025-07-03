@@ -30,6 +30,7 @@ def format_fig(fig):
             # Reduce logo size from 0.15 to 0.1 (about 33% smaller)
             image.sizex = 0.1
             image.sizey = 0.1
+            image.x = 1.05
 
     return formatted_fig
 
@@ -456,7 +457,7 @@ class HouseholdSelector:
     @staticmethod
     def _select_random(df_filtered: pd.DataFrame) -> int:
         """Select random household with button to reshuffle, biased towards higher weights."""
-        if st.sidebar.button("🎲 Get Random Household"):
+        if st.sidebar.button("Get Random Household"):
             # Use household weight as sampling probability
             st.session_state.random_household = df_filtered.sample(
                 1, weights="Household Weight"
@@ -740,7 +741,7 @@ class VisualizationRenderer:
             self._render_waterfall_chart(impacts, household_data)
         else:
             st.info(
-                f"The {self.reform_type} OBBB against {self.baseline.lower()} does not affect this household's {self.analysis_engine.analysis_type.value.lower()}."
+                f"The {self.reform_type} OBBBA against {self.baseline.lower()} does not affect this household's {self.analysis_engine.analysis_type.value.lower()}."
             )
 
     def _render_household_attributes(
@@ -969,7 +970,7 @@ class VisualizationRenderer:
 
         # Create chart title with reform type and baseline
         if self.reform_type and self.baseline:
-            chart_title_text = f"Impact of {self.reform_type} OBBB Against {self.baseline} by Provision on {self.analysis_engine.analysis_type.value}"
+            chart_title_text = f"Impact of {self.reform_type} OBBBA Against {self.baseline} by Provision on {self.analysis_engine.analysis_type.value}"
         else:
             chart_title_text = f"{chart_title} Changes"
 
@@ -1100,7 +1101,7 @@ class VisualizationRenderer:
         # Add population weight below
         weight = household_data["Household Weight"]
         st.markdown(
-            f"<p style='color: {UIConfig.colors['GRAY']}; font-size: 14px; margin-top: 10px; text-align: center;'>"
+            f"<p style='color: {UIConfig.colors['GRAY']}; font-size: 14px; margin-top: 10px; text-align: left;'>"
             f"This household represents {math.ceil(weight):,} households in the US."
             f"</p>",
             unsafe_allow_html=True,
@@ -1116,7 +1117,7 @@ class VisualizationRenderer:
         """Render the new 5x4 impact summary table."""
         st.markdown("---")
         st.subheader(
-            f"Financial Impact Breakdown of {self.reform_type} OBBB Against {self.baseline}"
+            f"Financial Impact Breakdown of {self.reform_type} OBBBA Against {self.baseline}"
         )
 
         # Prepare data for the table
@@ -1204,8 +1205,8 @@ class VisualizationRenderer:
             table_data,
             columns=[
                 "",
-                "Baseline Value",
-                "Reform Value",
+                f"{self.baseline}",
+                f"{self.reform_type} OBBBA",
                 "Absolute Change",
                 "% Change",
             ],
@@ -1219,7 +1220,6 @@ class VisualizationRenderer:
 
                 # Color positive changes in green, negative in red for absolute and % change columns
                 abs_change_val = row[4]  # Absolute Change column
-                pct_change_val = row[5]  # % Change column
 
                 if abs_change_val.startswith("+"):
                     if i in [3, 4]:  # Benefits and Net Income rows - positive is good
@@ -1442,7 +1442,7 @@ class HouseholdDashboard:
                 renderer._render_waterfall_chart(impacts, household_data)
             else:
                 st.info(
-                    f"The {self.reform_type} OBBB against {self.baseline.lower()} does not affect this household's {analysis_type.value.lower()}."
+                    f"The {self.reform_type} OBBBA against {self.baseline.lower()} does not affect this household's {analysis_type.value.lower()}."
                 )
 
             # Add analysis info card (collapsible)

@@ -1603,7 +1603,10 @@ def senate_finance_auto_loan_reform():
         {
             "gov.contrib.reconciliation.auto_loan_interest_ald.in_effect": {
                 "2025-01-01.2028-12-31": True
-            }
+            },
+            "gov.contrib.reconciliation.auto_loan_interest_ald.senate_version.applies": {
+                "2025-01-01.2100-12-31": True
+            },
         },
         country_id="us",
     )
