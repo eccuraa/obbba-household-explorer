@@ -17,19 +17,20 @@ import streamlit as st
 import os
 from policyengine_core.charts import format_fig as format_fig_
 
+
 def format_fig(fig):
     # Apply the original formatting
     formatted_fig = format_fig_(fig).update_layout(
         margin_r=120,
     )
-    
+
     # Make the logo smaller by reducing its size
-    if hasattr(formatted_fig, 'layout') and hasattr(formatted_fig.layout, 'images'):
+    if hasattr(formatted_fig, "layout") and hasattr(formatted_fig.layout, "images"):
         for image in formatted_fig.layout.images:
             # Reduce logo size from 0.15 to 0.1 (about 33% smaller)
             image.sizex = 0.1
             image.sizey = 0.1
-    
+
     return formatted_fig
 
 
@@ -44,7 +45,7 @@ class AnalysisType(Enum):
     NET_INCOME = "Net Income"
     FEDERAL_TAXES = "Federal Taxes"
     STATE_TAXES = "State Taxes"
-    
+
     BENEFITS = "Benefits"
 
 
@@ -53,12 +54,21 @@ class AppConfig:
 
     # CSV file mappings for different baselines and reform types
     CSV_FILES = {
-        ("Current Law", "House"): "household_tax_income_changes_current_law_baseline.csv",
-        ("Current Law", "Senate"): "household_tax_income_changes_senate_current_law_baseline.csv", 
+        (
+            "Current Law",
+            "House",
+        ): "household_tax_income_changes_current_law_baseline.csv",
+        (
+            "Current Law",
+            "Senate",
+        ): "household_tax_income_changes_senate_current_law_baseline.csv",
         ("Current Policy", "House"): "household_tax_income_changes_tcja_baseline.csv",
-        ("Current Policy", "Senate"): "household_tax_income_changes_senate_tcja_baseline.csv",
+        (
+            "Current Policy",
+            "Senate",
+        ): "household_tax_income_changes_senate_tcja_baseline.csv",
     }
-    
+
     # Legacy filenames for backward compatibility
     HOUSE_CSV_FILENAME = "household_tax_income_changes.csv"
     SENATE_CSV_FILENAME = "household_tax_income_changes_senate.csv"
@@ -660,12 +670,20 @@ class TaxAnalysisEngine:
 
         # Determine color based on analysis type and value
         if abs(change_value) < 1:
-            color = UIConfig.colors['BLACK']
+            color = UIConfig.colors["BLACK"]
         elif self.analysis_type in [AnalysisType.NET_INCOME, AnalysisType.BENEFITS]:
-            color = UIConfig.colors['TEAL_PRESSED'] if change_value > 0 else UIConfig.colors['GRAY']
+            color = (
+                UIConfig.colors["TEAL_PRESSED"]
+                if change_value > 0
+                else UIConfig.colors["GRAY"]
+            )
         else:
-            color = UIConfig.colors['GRAY'] if change_value > 0 else UIConfig.colors['TEAL_PRESSED']
-            
+            color = (
+                UIConfig.colors["GRAY"]
+                if change_value > 0
+                else UIConfig.colors["TEAL_PRESSED"]
+            )
+
         return change_value, pct_change, change_label, final_label, color, final_value
 
     def _get_column_prefix(self) -> str:
@@ -682,7 +700,12 @@ class TaxAnalysisEngine:
 class VisualizationRenderer:
     """Handles all UI rendering operations with consistent styling."""
 
-    def __init__(self, analysis_engine: TaxAnalysisEngine, reform_type: str = "", baseline: str = ""):
+    def __init__(
+        self,
+        analysis_engine: TaxAnalysisEngine,
+        reform_type: str = "",
+        baseline: str = "",
+    ):
         """Initialize with analysis engine."""
         self.analysis_engine = analysis_engine
         self.reform_type = reform_type
@@ -700,14 +723,14 @@ class VisualizationRenderer:
         with col2:
             self._render_baseline_info(profile, household_data)
             self._render_impact_summary(household_data)
-            
+
             # Add population weight in grey text
             weight = household_data["Household Weight"]
             st.markdown(
                 f"<p style='color: {UIConfig.colors['GRAY']}; font-size: 14px; margin-top: 10px;'>"
                 f"This household represents {math.ceil(weight):,} households in the US."
-                f"</p>", 
-                unsafe_allow_html=True
+                f"</p>",
+                unsafe_allow_html=True,
             )
 
         # Render analysis sections
@@ -771,7 +794,6 @@ class VisualizationRenderer:
         # Add market income with same formatting as other attributes
         content += f"<p style='color: UIConfig.colors['TEAL_PRESSED'];'><strong>Market Income:</strong> ${household_data['Market Income']:,.0f}</p>"
 
-
         return content
 
     def _get_dependent_ages(self, household_data: pd.Series) -> List[str]:
@@ -785,13 +807,14 @@ class VisualizationRenderer:
                     dependent_ages.append(f"{age:.0f}")
         return dependent_ages
 
-    def _get_marital_info(self, profile: HouseholdProfile, household_data: pd.Series) -> str:
+    def _get_marital_info(
+        self, profile: HouseholdProfile, household_data: pd.Series
+    ) -> str:
         """Get formatted marital status information."""
         if profile.is_married and profile.age_of_spouse:
             return f"Married<br><strong>Spouse Age:</strong> {profile.age_of_spouse:.0f} years"
         else:
             return "Single"
-
 
     def _render_household_attributes(
         self, profile: HouseholdProfile, household_data: pd.Series
@@ -811,12 +834,10 @@ class VisualizationRenderer:
 
         # Add some space before the expander
         st.markdown("<br>", unsafe_allow_html=True)
-        
+
         # Raw data expander outside the styled container
         with st.expander("Full Dataframe Row"):
             st.dataframe(household_data.to_frame().T, use_container_width=True)
-
-
 
     def _render_baseline_info(
         self, profile: HouseholdProfile, household_data: pd.Series
@@ -891,7 +912,7 @@ class VisualizationRenderer:
             AnalysisType.NET_INCOME: [
                 f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
                 f"State Taxes: ${state_tax:,.0f}" if state_tax > 0 else None,
-                f"Benefits: ${household_data['Baseline Benefits']:,.0f}"
+                f"Benefits: ${household_data['Baseline Benefits']:,.0f}",
             ],
             AnalysisType.BENEFITS: [
                 f"Federal Taxes: ${profile.baseline_federal_tax:,.0f}",
@@ -990,44 +1011,43 @@ class VisualizationRenderer:
 
         # Determine colors based on analysis type, sorry for the redundancy! It was simplest like this.
         if self.analysis_engine.analysis_type in [
-            AnalysisType.NET_INCOME, 
+            AnalysisType.NET_INCOME,
             AnalysisType.BENEFITS,
         ]:
             # For net income: increases are good (teal), decreases are bad (dark gray)
-            increasing_color = UIConfig.colors['TEAL_PRESSED']
-            decreasing_color = UIConfig.colors['GRAY']
+            increasing_color = UIConfig.colors["TEAL_PRESSED"]
+            decreasing_color = UIConfig.colors["GRAY"]
         else:
-            increasing_color = UIConfig.colors['GRAY']
-            decreasing_color = UIConfig.colors['TEAL_PRESSED']
-        
-        fig.add_trace(go.Waterfall(
-            name=f"{chart_title} Impact",
-            orientation="v",
-            measure=["absolute"] 
-            + ["relative"] * (len(waterfall_data) - 2) 
-            + ["total"],
-            x=[item[0] for item in waterfall_data],
-            y=[item[1] for item in waterfall_data],
-            text=[f"${item[1]:,.0f}" for item in waterfall_data],
-            textposition="outside",
-            textfont={"color": UIConfig.colors['GRAY']},
-            connector={"line": {"color": UIConfig.colors['DARKEST_BLUE']}},
-            increasing={"marker": {"color": increasing_color}},
-            decreasing={"marker": {"color": decreasing_color}},
-            totals={"marker": {"color": UIConfig.colors['BLUE_PRESSED']}},
-        ))
-        
+            increasing_color = UIConfig.colors["GRAY"]
+            decreasing_color = UIConfig.colors["TEAL_PRESSED"]
+
+        fig.add_trace(
+            go.Waterfall(
+                name=f"{chart_title} Impact",
+                orientation="v",
+                measure=["absolute"]
+                + ["relative"] * (len(waterfall_data) - 2)
+                + ["total"],
+                x=[item[0] for item in waterfall_data],
+                y=[item[1] for item in waterfall_data],
+                text=[f"${item[1]:,.0f}" for item in waterfall_data],
+                textposition="outside",
+                textfont={"color": UIConfig.colors["GRAY"]},
+                connector={"line": {"color": UIConfig.colors["DARKEST_BLUE"]}},
+                increasing={"marker": {"color": increasing_color}},
+                decreasing={"marker": {"color": decreasing_color}},
+                totals={"marker": {"color": UIConfig.colors["BLUE_PRESSED"]}},
+            )
+        )
+
         # Create chart title with reform type and baseline
         if self.reform_type and self.baseline:
             chart_title_text = f"Impact of {self.reform_type} OBBB Against {self.baseline} by Provision on {self.analysis_engine.analysis_type.value}"
         else:
             chart_title_text = f"{chart_title} Changes"
-        
+
         fig.update_layout(
-            title={
-                "text": chart_title_text,
-                "font": {"size": 30}
-            },
+            title={"text": chart_title_text, "font": {"size": 30}},
             yaxis_title=f"{chart_title} ($)",
             showlegend=False,
             height=AppConfig.CHART_HEIGHT,
@@ -1085,21 +1105,21 @@ class HouseholdDashboard:
         self._configure_page()
         self.data_manager = DataManager()
         self.filter_manager = FilterManager(FilterConfig.default())
-        
+
         # Add sidebar radio buttons for baseline and reform type selection
         st.sidebar.markdown("---")
         st.sidebar.subheader("Analysis Configuration")
-        
+
         # Baseline selection
         self.baseline = st.sidebar.radio(
             "Choose Baseline:", ("Current Law", "Current Policy"), index=0
         )
-        
-        # Reform type selection  
+
+        # Reform type selection
         self.reform_type = st.sidebar.radio(
             "Choose Reform Type:", ("House", "Senate"), index=0
         )
-        
+
         # Load appropriate CSV file based on selections
         csv_filename = AppConfig.CSV_FILES.get((self.baseline, self.reform_type))
         if csv_filename and os.path.exists(csv_filename):
@@ -1111,18 +1131,21 @@ class HouseholdDashboard:
             else:
                 csv_filename = AppConfig.SENATE_CSV_FILENAME
             self.df = self.data_manager.load_data(csv_filename)
-            
+
             # Show warning if using fallback files
-            st.warning(f"Using fallback file: {csv_filename}. The selected baseline ({self.baseline}) may not be available.")
+            st.warning(
+                f"Using fallback file: {csv_filename}. The selected baseline ({self.baseline}) may not be available."
+            )
 
     def _configure_page(self) -> None:
         """Configure Streamlit page settings."""
         st.set_page_config(
             page_title="Reconciliation Bill Impact Dashboard", layout="wide"
         )
-        
+
         # Add custom CSS for radio button styling
-        st.markdown("""
+        st.markdown(
+            """
         <style>
         .stRadio > div[role="radiogroup"] > label > div:first-child, .stCheckbox > div > label > div:first-child {
             background-color: #3378b2 !important;
@@ -1197,7 +1220,9 @@ class HouseholdDashboard:
             border-color: #3378b2 !important;
         }
         </style>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     def run(self) -> None:
         """
@@ -1223,7 +1248,9 @@ class HouseholdDashboard:
             st.query_params.update({"ID": household_id, ",": analysis_type})
 
             # Render main content
-            renderer = VisualizationRenderer(analysis_engine, self.reform_type, self.baseline)
+            renderer = VisualizationRenderer(
+                analysis_engine, self.reform_type, self.baseline
+            )
             renderer.render_main_content(profile, household_data)
 
             # Add analysis info card
